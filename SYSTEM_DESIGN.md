@@ -7,6 +7,7 @@ The iKey app is a browser-based emergency information manager that lets users cr
 ```mermaid
 graph TD
     User --> UI[index.html]
+    UI --> Creator[client-qr-creator.html iframe]
     UI --> AppJS[app.js]
     UI --> MedicationJS[medication.js]
     UI --> SessionJS[session.js]
@@ -14,7 +15,7 @@ graph TD
     UI --> HR[health-records.html iframe]
     UI --> TX911[text-911.html iframe]
 ```
-The application runs entirely in the browser. `index.html` orchestrates loading of JavaScript modules and embeds two auxiliary pages: `health-records.html` for viewing medical files and `text-911.html` for location-enabled texting to emergency services.
+The application runs entirely in the browser. `index.html` now loads the `client-qr-creator.html` iframe as its landing view for generating new client codes. It orchestrates JavaScript modules and embeds auxiliary pages: `health-records.html` for viewing medical files and `text-911.html` for location-enabled texting to emergency services.
 
 ## 3. Components
 ### 3.1 Core Logic (app.js)
@@ -32,6 +33,10 @@ The application runs entirely in the browser. `index.html` orchestrates loading 
 ### 3.4 Text Size Controller (text-size.js)
 * Provides accessible font scaling across the main document and embedded iframes.
 * Persists user selection in `localStorage` and synchronizes across tabs via the `storage` event.
+
+### 3.5 Client QR Creator (client-qr-creator.html)
+* Standalone interface to generate a client's GUID, encryption key, and QR code.
+* Embedded as the default landing page within `index.html`.
 
 ## 4. Data Model
 ### 4.1 Encrypted Record Structure
