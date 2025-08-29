@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Electronic Health Records - Secure Medical Record</title>
     <link rel="icon" href="https://storage.googleapis.com/art_homelessness/favicon.ico">
-    <script src="router.js"></script>
     <style>
         @page {
             size: letter;
@@ -1623,7 +1622,7 @@
                     if (window.parent && window.parent !== window) {
                         window.parent.postMessage({ type: 'closeHealthRecords' }, '*');
                     } else {
-                        router.go('home');
+                        window.location.href = 'index.html';
                     }
                 });
                 
