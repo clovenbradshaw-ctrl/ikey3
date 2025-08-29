@@ -112,7 +112,8 @@ class ThreeLayerEncryption {
   }
 
   // Build encrypted record and return GUID + qrKey
-  static async buildRecord(emergencyInfo, privateInfo, healthRecords, pin) {
+  // Health records are encrypted with a user-supplied password, which is never stored
+  static async buildRecord(emergencyInfo, privateInfo, healthRecords, pin, password) {
     const guid = self.crypto.randomUUID();
     const qrKey = this.generateQrKey();
 
@@ -123,7 +124,7 @@ class ThreeLayerEncryption {
     const privateCipher = await this.encrypt(privateInfo, pinKey);
 
     const vaultSalt = self.crypto.getRandomValues(new Uint8Array(16));
-    const vaultKey = await this.deriveKey(qrKey, vaultSalt, 100000);
+    const vaultKey = await this.deriveKey(password, vaultSalt, 100000);
     const vaultEnc = await this.encrypt(healthRecords, vaultKey);
 
     return {
@@ -152,9 +153,9 @@ class ThreeLayerEncryption {
     return await this.decrypt(storedData.privateCipher, pinKey);
   }
 
-  static async unlockVault(storedData, qrKey) {
+  static async unlockVault(storedData, password) {
     const vaultSalt = new Uint8Array(this.base64ToArrayBuffer(storedData.vault.salt));
-    const vaultKey = await this.deriveKey(qrKey, vaultSalt, 100000);
+    const vaultKey = await this.deriveKey(password, vaultSalt, 100000);
     return await this.decrypt({ iv: storedData.vault.iv, data: storedData.vault.data }, vaultKey);
   }
 }
@@ -185,12 +186,20 @@ class UnifiedHealthApp extends IKeyApp {
   }
 
   async loadVault(password) {
-    // Placeholder for password verification and vault loading.
-    if (window.currentBlob && window.currentBlob.vault) {
-      this.importVault(window.currentBlob.vault);
+    if (!password || !window.currentBlob || !window.currentBlob.storedData) {
+      return false;
     }
-    this.vaultUnlocked = true;
-    return true;
+    try {
+      const vault = await ThreeLayerEncryption.unlockVault(
+        window.currentBlob.storedData,
+        password
+      );
+      this.importVault(vault);
+      this.vaultUnlocked = true;
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }
 

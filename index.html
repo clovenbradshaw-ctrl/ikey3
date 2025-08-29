@@ -1352,14 +1352,7 @@
     </div>
 
     <div id="healthRecordsTab" style="display:none;">
-        <div class="container">
-            <div class="header">
-                <h1>Electronic Health Records</h1>
-            </div>
-            <div class="content">
-                <p>Health records vault feature coming soon.</p>
-            </div>
-        </div>
+        <iframe id="healthRecordsFrame" src="" style="width:100%;height:100vh;border:0;"></iframe>
     </div>
 
     <div id="text911Tab" style="display:none;">
@@ -1969,20 +1962,10 @@
         function requestPasswordUnlock() {
             const password = prompt('Enter password to access health records:');
             if (password) {
-                // Verify password (implement actual verification)
-                if (verifyPassword(password)) {
-                    passwordUnlocked = true;
-                    showHealthRecordsTab();
-                } else {
-                    alert('Incorrect password');
-                }
+                ownerPassword = password;
+                passwordUnlocked = true;
+                showHealthRecordsTab();
             }
-        }
-
-        async function verifyPassword(password) {
-            if (!currentBlob || !currentBlob.passwordHash) return false;
-            const hash = await sha256Hash(password + currentKey);
-            return hash === currentBlob.passwordHash;
         }
 
         function showCreationForm() {
@@ -2220,16 +2203,14 @@
                     }
                 };
 
-                // Hash the PIN and password
+                // Hash the PIN (password is not stored)
                 const pinHash = await sha256Hash(pin + currentKey);
-                const passwordHash = password ? await sha256Hash(password + currentKey) : null;
 
                 currentBlob = {
                     name: formData.name,
                     publicInfo,
                     pinProtected: true,
                     pinHash,
-                    passwordHash,
                     hasEHR: !!password,
                     created: new Date().toISOString()
                 };
@@ -2587,6 +2568,10 @@
             document.getElementById('qrTab').style.display = 'none';
             document.getElementById('healthRecordsTab').style.display = 'block';
             document.getElementById('text911Tab').style.display = 'none';
+            const frame = document.getElementById('healthRecordsFrame');
+            if (frame && !frame.src) {
+                frame.src = 'health-records.html';
+            }
         }
 
         function show911Tab() {
