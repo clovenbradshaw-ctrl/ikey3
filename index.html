@@ -951,6 +951,216 @@
             border-radius: 8px;
         }
 
+        /* PIN Pad Styles */
+        .pin-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, #0f0f1e 0%, #1a1a2e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .pin-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .pin-overlay::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        .pin-container {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+        }
+
+        .pin-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .lock-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 15px;
+        }
+
+        .lock-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke: #6366f1;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .pin-title {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .pin-subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            font-weight: 300;
+        }
+
+        .pin-display {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 35px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            min-height: 70px;
+            align-items: center;
+        }
+
+        .pin-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .pin-dot.filled {
+            background: #6366f1;
+            border-color: #6366f1;
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .pin-dot.error {
+            animation: shake 0.5s;
+            background: #ef4444;
+            border-color: #ef4444;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .pin-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .pin-key {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 24px;
+            font-weight: 300;
+            height: 70px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pin-key:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        .pin-key:active {
+            transform: translateY(0);
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .pin-key.zero-key {
+            grid-column: 2;
+        }
+
+        .pin-action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .pin-action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+        }
+
+        .pin-action-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .pin-action-btn.delete {
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .pin-action-btn.delete:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.5);
+            color: #ef4444;
+        }
+
+        .pin-action-btn.cancel {
+            border-color: rgba(156, 163, 175, 0.3);
+        }
+
+        .pin-error-message {
+            color: #ef4444;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            min-height: 20px;
+        }
+
         /* Emergency card */
         .emergency-card {
             margin: 16px;
@@ -1177,6 +1387,53 @@
         <div class="dev-output" id="dev-output"></div>
     </div>
 
+    <!-- PIN Pad Overlay -->
+    <div id="pin-overlay" class="pin-overlay">
+        <div class="pin-container">
+            <div class="pin-header">
+                <div class="lock-icon">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                </div>
+                <h1 class="pin-title">Enter Security PIN</h1>
+                <p class="pin-subtitle">Please enter your 6-digit code</p>
+            </div>
+            
+            <div class="pin-display" id="pinDisplay">
+                <div class="pin-dot" id="dot1"></div>
+                <div class="pin-dot" id="dot2"></div>
+                <div class="pin-dot" id="dot3"></div>
+                <div class="pin-dot" id="dot4"></div>
+                <div class="pin-dot" id="dot5"></div>
+                <div class="pin-dot" id="dot6"></div>
+            </div>
+            
+            <div class="pin-keypad">
+                <button class="pin-key" data-value="1">1</button>
+                <button class="pin-key" data-value="2">2</button>
+                <button class="pin-key" data-value="3">3</button>
+                <button class="pin-key" data-value="4">4</button>
+                <button class="pin-key" data-value="5">5</button>
+                <button class="pin-key" data-value="6">6</button>
+                <button class="pin-key" data-value="7">7</button>
+                <button class="pin-key" data-value="8">8</button>
+                <button class="pin-key" data-value="9">9</button>
+                <div></div>
+                <button class="pin-key zero-key" data-value="0">0</button>
+                <div></div>
+            </div>
+            
+            <div class="pin-action-row">
+                <button class="pin-action-btn delete" id="clearBtn">Clear</button>
+                <button class="pin-action-btn cancel" id="cancelBtn">Cancel</button>
+            </div>
+            
+            <div class="pin-error-message" id="pinErrorMessage"></div>
+        </div>
+    </div>
+
     <!-- QR Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
@@ -1314,6 +1571,9 @@
         let currentBlob = null;
         let currentMode = null;
         let ownerPassword = null;
+        let currentPIN = null;
+        let pinUnlocked = false;
+        let passwordUnlocked = false;
         let translations = {
             en: {
                 emergencyInfo: "Emergency Information",
@@ -1336,8 +1596,144 @@
         // Mock storage for testing
         const mockArchiveStorage = new Map();
 
+        // PIN Pad functionality
+        let pinEntry = '';
+        let pinAttempts = 0;
+        const maxPinAttempts = 3;
+
+        function initPinPad() {
+            const keys = document.querySelectorAll('.pin-key[data-value]');
+            const clearBtn = document.getElementById('clearBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const dots = document.querySelectorAll('.pin-dot');
+
+            function updatePinDisplay() {
+                dots.forEach((dot, index) => {
+                    if (index < pinEntry.length) {
+                        dot.classList.add('filled');
+                    } else {
+                        dot.classList.remove('filled');
+                    }
+                    dot.classList.remove('error');
+                });
+            }
+
+            function clearPin() {
+                pinEntry = '';
+                updatePinDisplay();
+                document.getElementById('pinErrorMessage').textContent = '';
+            }
+
+            function submitPin() {
+                if (pinEntry.length === 6) {
+                    verifyPin(pinEntry);
+                }
+            }
+
+            keys.forEach(key => {
+                key.addEventListener('click', () => {
+                    if (pinEntry.length < 6) {
+                        pinEntry += key.getAttribute('data-value');
+                        updatePinDisplay();
+                        
+                        if (pinEntry.length === 6) {
+                            setTimeout(() => {
+                                submitPin();
+                            }, 300);
+                        }
+                    }
+                });
+            });
+
+            clearBtn.addEventListener('click', clearPin);
+            cancelBtn.addEventListener('click', () => {
+                closePinPad();
+                clearPin();
+            });
+
+            // Keyboard support
+            document.addEventListener('keydown', (e) => {
+                const overlay = document.getElementById('pin-overlay');
+                if (!overlay.classList.contains('active')) return;
+                
+                if (e.key >= '0' && e.key <= '9' && pinEntry.length < 6) {
+                    pinEntry += e.key;
+                    updatePinDisplay();
+                    
+                    if (pinEntry.length === 6) {
+                        setTimeout(() => {
+                            submitPin();
+                        }, 300);
+                    }
+                } else if (e.key === 'Backspace' || e.key === 'Delete') {
+                    clearPin();
+                } else if (e.key === 'Escape') {
+                    closePinPad();
+                    clearPin();
+                }
+            });
+        }
+
+        function showPinPad(callback) {
+            window.pinCallback = callback;
+            const overlay = document.getElementById('pin-overlay');
+            overlay.classList.add('active');
+            pinEntry = '';
+            const dots = document.querySelectorAll('.pin-dot');
+            dots.forEach(dot => {
+                dot.classList.remove('filled', 'error');
+            });
+        }
+
+        function closePinPad() {
+            const overlay = document.getElementById('pin-overlay');
+            overlay.classList.remove('active');
+            window.pinCallback = null;
+        }
+
+        async function verifyPin(enteredPin) {
+            if (!currentBlob || !currentBlob.pinHash) {
+                document.getElementById('pinErrorMessage').textContent = 'No PIN set';
+                return;
+            }
+
+            const enteredHash = await sha256Hash(enteredPin + currentKey);
+            
+            if (enteredHash === currentBlob.pinHash) {
+                pinUnlocked = true;
+                currentPIN = enteredPin;
+                closePinPad();
+                
+                if (window.pinCallback) {
+                    window.pinCallback(true, enteredPin);
+                }
+                
+                // Refresh the display
+                displayEmergencyInfo(currentBlob);
+            } else {
+                pinAttempts++;
+                const dots = document.querySelectorAll('.pin-dot');
+                dots.forEach(dot => dot.classList.add('error'));
+                
+                if (pinAttempts >= maxPinAttempts) {
+                    document.getElementById('pinErrorMessage').textContent = 'Too many attempts. Please wait 30 seconds.';
+                    setTimeout(() => {
+                        pinAttempts = 0;
+                        closePinPad();
+                    }, 30000);
+                } else {
+                    document.getElementById('pinErrorMessage').textContent = `Incorrect PIN. ${maxPinAttempts - pinAttempts} attempts remaining.`;
+                    setTimeout(() => {
+                        pinEntry = '';
+                        dots.forEach(dot => dot.classList.remove('filled', 'error'));
+                    }, 500);
+                }
+            }
+        }
+
         // ============= INITIALIZATION =============
         window.addEventListener('DOMContentLoaded', async function() {
+            initPinPad();
             await parseAndDisplay();
         });
 
@@ -1358,13 +1754,24 @@
                 
                 try {
                     const embedded = JSON.parse(atob(embeddedStr));
-                    currentBlob = {
-                        name: embedded.n,
-                        publicInfo: {
-                            bloodType: embedded.b,
-                            allergies: embedded.a
-                        }
-                    };
+                    
+                    // Try to load from mock storage first
+                    if (CONFIG.USE_MOCK_ARCHIVE && mockArchiveStorage.has(guid)) {
+                        const data = mockArchiveStorage.get(guid);
+                        const decrypted = await decrypt(data.data, key);
+                        currentBlob = JSON.parse(decrypted);
+                    } else {
+                        // Create basic blob from embedded data
+                        currentBlob = {
+                            name: embedded.n,
+                            publicInfo: {
+                                bloodType: embedded.b,
+                                allergies: embedded.a
+                            },
+                            pinProtected: embedded.p || false
+                        };
+                    }
+                    
                     showQRTab();
                     displayEmergencyInfo(currentBlob);
                 } catch (e) {
@@ -1385,7 +1792,10 @@
                     <div class="info-header">
                         <h2><span class="info-icon">🔑</span> Personal Information</h2>
                     </div>
-                    <div class="content">
+                    <div class="content">`;
+
+            // Always visible emergency info
+            html += `
                         <div class="info-section">
                             <div class="info-item">
                                 <span class="info-icon">👤</span>
@@ -1417,19 +1827,65 @@
                     </div>`;
             }
 
-            if (publicInfo.medications) {
+            html += `</div>`; // Close basic section
+
+            // PIN-protected sections
+            if (fullData.pinProtected && !pinUnlocked) {
                 html += `
-                    <div class="info-item">
-                        <span class="info-icon">💊</span>
-                        <div class="info-content">
-                            <div class="info-label">Medications</div>
-                            <div class="info-value">${publicInfo.medications}</div>
-                        </div>
+                    <div class="private-section">
+                        <h3>🔒 Additional Information</h3>
+                        <p>This section contains medications and contact information.</p>
+                        <button class="btn btn-outline" onclick="requestPinUnlock()">
+                            Enter PIN to View
+                        </button>
+                    </div>`;
+            } else if (pinUnlocked || !fullData.pinProtected) {
+                // Show PIN-protected content
+                if (publicInfo.medications) {
+                    html += `
+                        <div class="info-section">
+                            <div class="info-item">
+                                <span class="info-icon">💊</span>
+                                <div class="info-content">
+                                    <div class="info-label">Medications</div>
+                                    <div class="info-value">${publicInfo.medications}</div>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+
+                if (publicInfo.contact) {
+                    html += `
+                        <div class="info-section">
+                            <div class="info-item">
+                                <span class="info-icon">📞</span>
+                                <div class="info-content">
+                                    <div class="info-label">Emergency Contact</div>
+                                    <div class="info-value">
+                                        ${publicInfo.contact.name}
+                                        <a href="tel:${publicInfo.contact.phone}" class="phone-link">
+                                            📱 ${publicInfo.contact.phone}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+            }
+
+            // Password-protected health records
+            if (fullData.hasEHR && !passwordUnlocked) {
+                html += `
+                    <div class="private-section">
+                        <h3>🏥 Electronic Health Records</h3>
+                        <p>This section contains detailed medical history and records.</p>
+                        <button class="btn btn-outline" onclick="requestPasswordUnlock()">
+                            Enter Password to Access
+                        </button>
                     </div>`;
             }
 
             html += `
-                        </div>
                         <div class="help-link">
                             <a href="#" onclick="toggleHelp(); return false;">How It Works</a>
                             <div id="help-content" class="help-content"></div>
@@ -1438,6 +1894,34 @@
                 </div>`;
 
             container.innerHTML = html;
+        }
+
+        function requestPinUnlock() {
+            showPinPad((success, pin) => {
+                if (success) {
+                    pinUnlocked = true;
+                    displayEmergencyInfo(currentBlob);
+                }
+            });
+        }
+
+        function requestPasswordUnlock() {
+            const password = prompt('Enter password to access health records:');
+            if (password) {
+                // Verify password (implement actual verification)
+                if (verifyPassword(password)) {
+                    passwordUnlocked = true;
+                    showHealthRecordsTab();
+                } else {
+                    alert('Incorrect password');
+                }
+            }
+        }
+
+        async function verifyPassword(password) {
+            if (!currentBlob || !currentBlob.passwordHash) return false;
+            const hash = await sha256Hash(password + currentKey);
+            return hash === currentBlob.passwordHash;
         }
 
         function showCreationForm() {
@@ -1520,19 +2004,41 @@
                         </div>
 
                         <div class="section-title">
-                            Password Protected
-                            <span class="section-status incomplete" id="password-status">Incomplete</span>
+                            Security PIN
+                            <span class="section-status incomplete" id="pin-status">Incomplete</span>
                         </div>
 
                         <div class="form-group">
-                            <label for="password">Password *</label>
-                            <input type="password" id="password" required placeholder="Choose a password">
+                            <label for="pin">6-Digit Security PIN *</label>
+                            <input type="password" id="pin" required placeholder="Enter 6 digits" 
+                                   pattern="[0-9]{6}" maxlength="6" inputmode="numeric">
+                            <div class="hint">This PIN will protect your emergency information</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pin-confirm">Confirm PIN *</label>
+                            <input type="password" id="pin-confirm" required placeholder="Re-enter PIN" 
+                                   pattern="[0-9]{6}" maxlength="6" inputmode="numeric">
+                        </div>
+
+                        <div class="section-title">
+                            Advanced Security (Optional)
+                            <span class="section-status incomplete" id="password-status">Optional</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Password (for Health Records)</label>
+                            <input type="password" id="password" placeholder="Optional - for EHR access">
                             <div id="password-strength" class="hint"></div>
                         </div>
 
                         <div class="form-group">
-                            <label for="password-confirm">Confirm Password *</label>
-                            <input type="password" id="password-confirm" required placeholder="Re-enter password">
+                            <label for="password-confirm">Confirm Password</label>
+                            <input type="password" id="password-confirm" placeholder="Re-enter password">
+                        </div>
+
+                        <div class="hint">
+                            The PIN provides quick access to emergency info. The optional password adds extra protection for health records and private data.
                         </div>
 
                         <button type="submit" class="btn">
@@ -1582,6 +2088,9 @@
             ['name', 'contact-name', 'contact-phone'].forEach(id => {
                 document.getElementById(id).addEventListener('input', updateSectionStatus);
             });
+            ['pin', 'pin-confirm'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updateSectionStatus);
+            });
             ['password', 'password-confirm'].forEach(id => {
                 document.getElementById(id).addEventListener('input', updateSectionStatus);
             });
@@ -1595,11 +2104,28 @@
             button.innerHTML = '<span>Creating...</span>';
 
             try {
+                const pin = document.getElementById('pin').value;
+                const confirmPin = document.getElementById('pin-confirm').value;
                 const password = document.getElementById('password').value;
                 const confirmPassword = document.getElementById('password-confirm').value;
 
-                if (password !== confirmPassword) {
-                    throw new Error('Passwords do not match');
+                // Validate PIN
+                if (!/^\d{6}$/.test(pin)) {
+                    throw new Error('PIN must be exactly 6 digits');
+                }
+
+                if (pin !== confirmPin) {
+                    throw new Error('PINs do not match');
+                }
+
+                // Validate password if provided
+                if (password) {
+                    if (password !== confirmPassword) {
+                        throw new Error('Passwords do not match');
+                    }
+                    if (password.length < 8) {
+                        throw new Error('Password must be at least 8 characters');
+                    }
                 }
 
                 // Generate identifiers
@@ -1627,9 +2153,17 @@
                     }
                 };
 
+                // Hash the PIN and password
+                const pinHash = await sha256Hash(pin + currentKey);
+                const passwordHash = password ? await sha256Hash(password + currentKey) : null;
+
                 currentBlob = {
                     name: formData.name,
                     publicInfo,
+                    pinProtected: true,
+                    pinHash,
+                    passwordHash,
+                    hasEHR: !!password,
                     created: new Date().toISOString()
                 };
 
@@ -1651,6 +2185,7 @@
                     n: formData.name,
                     b: formData.bloodType,
                     a: formData.allergies,
+                    p: true, // Has PIN protection
                     t: new Date().toISOString()
                 }));
 
@@ -1671,7 +2206,7 @@
                 // Show success
                 document.getElementById('create-form').style.display = 'none';
                 document.getElementById('qr-result').style.display = 'block';
-                showStatus('iKey created successfully!', 'success');
+                showStatus('iKey created successfully! PIN: ' + pin, 'success');
 
             } catch (error) {
                 showStatus('Error: ' + error.message, 'error');
@@ -1682,6 +2217,13 @@
         }
 
         // ============= UTILITY FUNCTIONS =============
+        async function sha256Hash(text) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
         function generateGUID() {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                 const r = Math.random() * 16 | 0;
@@ -1810,6 +2352,7 @@
 
         function updateSectionStatus() {
             const personalStatus = document.getElementById('personal-status');
+            const pinStatus = document.getElementById('pin-status');
             const passwordStatus = document.getElementById('password-status');
 
             if (personalStatus) {
@@ -1828,18 +2371,33 @@
                 }
             }
 
+            if (pinStatus) {
+                const pin = document.getElementById('pin')?.value;
+                const pin2 = document.getElementById('pin-confirm')?.value;
+                
+                if (pin && pin === pin2 && /^\d{6}$/.test(pin)) {
+                    pinStatus.textContent = 'Complete';
+                    pinStatus.classList.add('complete');
+                    pinStatus.classList.remove('incomplete');
+                } else {
+                    pinStatus.textContent = 'Incomplete';
+                    pinStatus.classList.add('incomplete');
+                    pinStatus.classList.remove('complete');
+                }
+            }
+
             if (passwordStatus) {
                 const pwd = document.getElementById('password')?.value;
                 const pwd2 = document.getElementById('password-confirm')?.value;
                 
                 if (pwd && pwd === pwd2 && pwd.length >= 8) {
-                    passwordStatus.textContent = 'Complete';
+                    passwordStatus.textContent = 'Set';
                     passwordStatus.classList.add('complete');
                     passwordStatus.classList.remove('incomplete');
                 } else {
-                    passwordStatus.textContent = 'Incomplete';
-                    passwordStatus.classList.add('incomplete');
+                    passwordStatus.textContent = 'Optional';
                     passwordStatus.classList.remove('complete');
+                    passwordStatus.classList.remove('incomplete');
                 }
             }
         }
