@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Client QR Creator – UX Enhanced</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--muted:#94a3b8;--text:#e5e7eb;--accent:#22d3ee;--outline:#1f2937;--ok:#10b981;--warn:#f59e0b;--err:#ef4444}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0b1220,#0f172a 40%);color:var(--text)}
+    .wrap{max-width:1100px;margin:0 auto;padding:24px}
+    .grid{display:grid;gap:20px;grid-template-columns:1.1fr .9fr}
+    @media (max-width: 960px){.grid{grid-template-columns:1fr}}
+    .card{background:linear-gradient(180deg,#0d1526,#0b1322);border:1px solid var(--outline);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .card h2{margin:0 0 12px;font-size:22px}
+    .card .body{padding:18px}
+    label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
+    input,select,textarea{width:100%;padding:12px 12px;border-radius:10px;border:1px solid #253049;background:#0d1729;color:var(--text);outline:none}
+    input:focus,select:focus,textarea:focus{border-color:#334155;box-shadow:0 0 0 2px rgba(34,211,238,.15)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+    button,.btn{background:#0b2139;border:1px solid #1f2d48;color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600}
+    button:hover,.btn:hover{border-color:#2b426e}
+    .btn.primary{background:linear-gradient(180deg,#0ea5e9,#22d3ee);color:#04121a;border:none}
+    .btn.ghost{background:transparent;border:1px dashed #2b426e;color:#9fb5d6}
+    .mini{font-size:12px;color:var(--muted)}
+    .stack{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .pill{padding:6px 10px;border-radius:999px;border:1px solid #2b426e;background:#0b2139;font-size:12px;color:#b8d1ff}
+    .muted{color:#aab7cf}
+    .qrWrap{display:flex;align-items:center;justify-content:center;min-height:318px;border:1px dashed #224; border-radius:14px;background:radial-gradient(120px 120px at 70% 10%, rgba(34,211,238,.05), transparent)}
+    .qrBox{padding:14px;background:#0b1322;border:1px solid #223049;border-radius:14px}
+    .urlBox{word-break:break-all;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#0a1220;border:1px solid #1a2236;padding:10px;border-radius:10px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap}
+    .divider{height:1px;background:#1d2740;margin:18px 0}
+    .toast{position:fixed;right:18px;bottom:18px;background:#0b2139;border:1px solid #2b426e;padding:10px 14px;border-radius:12px;opacity:0;transform:translateY(10px);transition:all .25s ease;pointer-events:none}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700}
+    .badge.ok{background:rgba(16,185,129,.12);color:#7ce9c6;border:1px solid rgba(16,185,129,.35)}
+    .badge.err{background:rgba(239,68,68,.12);color:#ffb1b1;border:1px solid rgba(239,68,68,.35)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px">
+      <div>
+        <h1 style="margin:0;font-size:26px;letter-spacing:.2px">Client QR Creator</h1>
+        <div class="mini">Targets <span class="pill">https://clovenbradshaw-ctrl.github.io/ikey3/</span><span class="pill">&lt;guid&gt;#&lt;encryption&gt;</span></div>
+      </div>
+      <div class="stack">
+        <span id="statusBadge" class="badge ok">Ready</span>
+        <button id="regenAll" class="btn">Regenerate IDs</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Left: Client form -->
+      <section class="card" aria-labelledby="clientInfoHeading">
+        <div class="body">
+          <h2 id="clientInfoHeading">Client info</h2>
+          <div class="row">
+            <div>
+              <label for="cName">Full name</label>
+              <input id="cName" placeholder="Jane Doe" autocomplete="name" />
+            </div>
+            <div>
+              <label for="cBlood">Blood type</label>
+              <select id="cBlood">
+                <option value="">—</option>
+                <option>O+</option><option>O-</option>
+                <option>A+</option><option>A-</option>
+                <option>B+</option><option>B-</option>
+                <option>AB+</option><option>AB-</option>
+              </select>
+            </div>
+          </div>
+          <label for="cAllergies">Allergies</label>
+          <input id="cAllergies" placeholder="Penicillin; peanuts" />
+
+          <div class="row">
+            <div>
+              <label for="ecName">Emergency contact – name</label>
+              <input id="ecName" placeholder="John Doe" />
+            </div>
+            <div>
+              <label for="ecPhone">Emergency contact – phone</label>
+              <input id="ecPhone" placeholder="(555) 123-4567" inputmode="tel" />
+            </div>
+          </div>
+          <label for="ecRel">Emergency contact – relationship</label>
+          <input id="ecRel" placeholder="Spouse" />
+
+          <div class="divider"></div>
+          <div class="row">
+            <div>
+              <label for="guid">GUID</label>
+              <input id="guid" readonly />
+            </div>
+            <div>
+              <label for="key">Encryption key</label>
+              <input id="key" readonly />
+            </div>
+          </div>
+          <div class="btns">
+            <button id="saveClient" class="btn primary">Generate QR</button>
+            <button id="clearForm" class="btn ghost">Clear</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: QR + actions -->
+      <section class="card">
+        <div class="body">
+          <h2>QR & Link</h2>
+          <div class="qrWrap"><div id="qr" class="qrBox" aria-live="polite"></div></div>
+          <div class="divider"></div>
+          <label for="urlOut">Target URL</label>
+          <div id="urlOut" class="urlBox" tabindex="0" aria-live="polite">—</div>
+
+          <div class="toolbar btns">
+            <button id="copyUrl" class="btn">Copy URL</button>
+            <button id="downloadPng" class="btn">Download PNG</button>
+            <button id="printCard" class="btn">Print card</button>
+            <button id="shareUrl" class="btn">Share…</button>
+          </div>
+          <p class="mini muted">The QR encodes only the URL. Client PII stays on this device unless you choose to store/export it.</p>
+        </div>
+      </section>
+    </div>
+
+    <footer style="margin-top:20px" class="mini muted">
+      <span>Tip: Press <b>Regenerate IDs</b> to mint a fresh <i>guid</i> and <i>encryption</i> without touching client fields.</span>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">Copied!</div>
+
+<script>
+  const VIEWER_URL = 'https://clovenbradshaw-ctrl.github.io/ikey3/';
+
+  // ——— Helpers ———
+  function generateGUID(){
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = crypto.getRandomValues(new Uint8Array(1))[0] & 15;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+  function generateKey(length=32){
+    const arr = new Uint8Array(length);
+    crypto.getRandomValues(arr);
+    let s = '';
+    for (const b of arr) s += String.fromCharCode(b);
+    return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function buildUrl(guid,key){
+    return `${VIEWER_URL}${guid}#${key}`;
+  }
+  function showToast(msg='Done'){
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),1300);
+  }
+  function validate(){
+    const name = cName.value.trim();
+    if(!name){
+      statusBadge.textContent='Name required';
+      statusBadge.className='badge err';
+      return false;
+    }
+    statusBadge.textContent='Ready';
+    statusBadge.className='badge ok';
+    return true;
+  }
+
+  // ——— State ———
+  const cName = document.getElementById('cName');
+  const cBlood = document.getElementById('cBlood');
+  const cAllergies = document.getElementById('cAllergies');
+  const ecName = document.getElementById('ecName');
+  const ecPhone = document.getElementById('ecPhone');
+  const ecRel = document.getElementById('ecRel');
+  const guidEl = document.getElementById('guid');
+  const keyEl = document.getElementById('key');
+  const urlOut = document.getElementById('urlOut');
+  const qrBox = document.getElementById('qr');
+  const statusBadge = document.getElementById('statusBadge');
+
+  let currentGUID = generateGUID();
+  let currentKey = generateKey();
+  guidEl.value = currentGUID; keyEl.value = currentKey;
+
+  // Persist non-sensitive fields locally for convenience
+  const LS_KEY = 'clientForm.v1';
+  function saveDraft(){
+    const draft = {
+      name:cName.value, blood:cBlood.value, allergies:cAllergies.value,
+      ecName:ecName.value, ecPhone:ecPhone.value, ecRel:ecRel.value
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(draft));
+  }
+  function loadDraft(){
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      if(!raw) return; const d = JSON.parse(raw);
+      cName.value=d.name||''; cBlood.value=d.blood||''; cAllergies.value=d.allergies||'';
+      ecName.value=d.ecName||''; ecPhone.value=d.ecPhone||''; ecRel.value=d.ecRel||'';
+    }catch{ /* no-op */ }
+  }
+  loadDraft();
+  [cName,cBlood,cAllergies,ecName,ecPhone,ecRel].forEach(el=>el.addEventListener('input', saveDraft));
+
+  // ——— QR handling ———
+  let qrInstance = null;
+  function renderQR(url){
+    qrBox.innerHTML='';
+    qrInstance = new QRCode(qrBox, { text:url, width:256, height:256, correctLevel: QRCode.CorrectLevel.M });
+  }
+
+  function updateOutputs(){
+    const url = buildUrl(currentGUID,currentKey);
+    urlOut.textContent = url;
+    renderQR(url);
+  }
+  updateOutputs();
+
+  // ——— Actions ———
+  document.getElementById('regenAll').addEventListener('click', ()=>{
+    currentGUID = generateGUID();
+    currentKey = generateKey();
+    guidEl.value = currentGUID; keyEl.value = currentKey;
+    updateOutputs(); showToast('New IDs generated');
+  });
+
+  document.getElementById('saveClient').addEventListener('click', ()=>{
+    if(!validate()) return;
+    const clientInfo = {
+      name: cName.value.trim(),
+      publicInfo: {
+        bloodType: cBlood.value.trim(),
+        allergies: cAllergies.value.trim(),
+        contact: { name: ecName.value.trim(), phone: ecPhone.value.trim(), relationship: ecRel.value.trim() }
+      },
+      created: new Date().toISOString()
+    };
+    // In your app you might store clientInfo keyed by GUID locally or remotely.
+    // This demo intentionally avoids network I/O to keep PII on-device.
+    showToast('QR generated');
+    updateOutputs();
+  });
+
+  document.getElementById('clearForm').addEventListener('click', ()=>{
+    [cName,cBlood,cAllergies,ecName,ecPhone,ecRel].forEach(el=>el.value='');
+    saveDraft();
+    showToast('Cleared');
+  });
+
+  document.getElementById('copyUrl').addEventListener('click', async ()=>{
+    try{ await navigator.clipboard.writeText(urlOut.textContent); showToast('URL copied'); }
+    catch{ showToast('Copy failed'); }
+  });
+
+  document.getElementById('downloadPng').addEventListener('click', ()=>{
+    // qrcodejs renders a <img> or <canvas>. Prefer canvas for PNG.
+    const img = qrBox.querySelector('img');
+    const canvas = qrBox.querySelector('canvas');
+    if(canvas){
+      const link = document.createElement('a');
+      link.download = `ikey3-qr-${currentGUID}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('PNG downloaded');
+    } else if(img){
+      // Fallback: open image in new tab, user can save.
+      window.open(img.src, '_blank');
+    }
+  });
+
+  document.getElementById('printCard').addEventListener('click', ()=>{
+    const url = urlOut.textContent;
+    const w = window.open('', '_blank');
+    w.document.write(`<!doctype html><title>Client QR Card</title>
+      <style>body{font-family:Inter,system-ui;padding:24px} .box{display:flex;gap:16px;align-items:center}
+      .mono{font-family:ui-monospace,Menlo,monospace;word-break:break-all}
+      .meta{margin-top:6px;color:#444}
+      img,canvas{border:1px solid #ddd;border-radius:8px;padding:6px}</style>`);
+    w.document.write(`<h2>Client QR</h2><div class='box'><div id='q'></div><div class='mono'>${url}<div class='meta'>GUID: ${currentGUID}<br/>Key: ${currentKey}</div></div></div>`);
+    w.document.write(`<script src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'><\/script>`);
+    w.document.write(`<script>new QRCode(document.getElementById('q'),{text:${JSON.stringify(url)},width:180,height:180});<\/script>`);
+    w.document.close();
+    w.focus();
+    w.print();
+  });
+
+  document.getElementById('shareUrl').addEventListener('click', async ()=>{
+    const url = urlOut.textContent;
+    if(navigator.share){
+      try{ await navigator.share({ title:'ikey3 link', text:'Client key link', url}); showToast('Shared'); }
+      catch{ /* user canceled */ }
+    } else {
+      await navigator.clipboard.writeText(url); showToast('URL copied');
+    }
+  });
+</script>
+</body>
+</html>
