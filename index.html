@@ -2341,7 +2341,7 @@
                         </div>
                 ;
 
-            html += 
+            html +=
                         <div class="help-link">
                             <a href="#" onclick="toggleHelp(); return false;">How It Works</a>
                             <div id="help-content" class="help-content"></div>
@@ -2350,8 +2350,67 @@
                 </div>
             ;
 
+            html += `
+                <div id="private-section">
+                  <button id="unlock-btn">Unlock</button>
+                  <form id="pin-form" style="display:none;">
+                    <input id="pin-input" type="password" inputmode="numeric" pattern="\\d{6}" maxlength="6" required />
+                    <button type="submit">Unlock</button>
+                    <span id="pin-error" class="hint"></span>
+                  </form>
+                  <pre id="private-data"></pre>
+                </div>`;
+
             container.innerHTML = html;
             setLanguage(currentLanguage);
+
+            if (fullData.privateCipher && fullData.pinSalt) {
+                const unlockBtn = document.getElementById('unlock-btn');
+                const pinForm = document.getElementById('pin-form');
+                const pinInput = document.getElementById('pin-input');
+                const pinError = document.getElementById('pin-error');
+                const privateDataEl = document.getElementById('private-data');
+                let attempts = 0;
+                let locked = false;
+
+                unlockBtn.addEventListener('click', () => {
+                    unlockBtn.style.display = 'none';
+                    pinForm.style.display = 'block';
+                });
+
+                pinForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (locked) return;
+                    const pin = pinInput.value.trim();
+                    if (!/^\\d{6}$/.test(pin)) {
+                        pinError.textContent = 'Enter 6-digit PIN';
+                        return;
+                    }
+                    try {
+                        const salt = new Uint8Array(ThreeLayerEncryption.base64ToArrayBuffer(fullData.pinSalt));
+                        const key = await ThreeLayerEncryption.derivePinKey(pin, salt);
+                        const priv = await ThreeLayerEncryption.decrypt(fullData.privateCipher, key);
+                        privateDataEl.textContent = JSON.stringify(priv, null, 2);
+                        pinForm.style.display = 'none';
+                    } catch (err) {
+                        attempts++;
+                        pinError.textContent = 'Incorrect PIN';
+                        if (attempts >= 3) {
+                            locked = true;
+                            pinInput.disabled = true;
+                            setTimeout(() => {
+                                locked = false;
+                                attempts = 0;
+                                pinInput.disabled = false;
+                                pinError.textContent = '';
+                            }, 30000);
+                        }
+                    }
+                });
+            } else {
+                const sec = document.getElementById('private-section');
+                if (sec) sec.style.display = 'none';
+            }
         }
 
         async function ownerLogin() {

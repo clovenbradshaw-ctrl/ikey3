@@ -57,6 +57,26 @@ class ThreeLayerEncryption {
     return this.arrayBufferToBase64(raw);
   }
 
+  static async derivePinKey(pin, salt) {
+    const enc = new TextEncoder();
+    const keyMaterial = await self.crypto.subtle.importKey(
+      'raw',
+      enc.encode(pin),
+      'PBKDF2',
+      false,
+      ['deriveBits', 'deriveKey']
+    );
+    const key = await self.crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      true,
+      ['encrypt', 'decrypt']
+    );
+    const raw = await self.crypto.subtle.exportKey('raw', key);
+    return this.arrayBufferToBase64(raw);
+  }
+
   static async sha256(text) {
     const data = new TextEncoder().encode(text);
     const hash = await self.crypto.subtle.digest('SHA-256', data);
@@ -92,14 +112,15 @@ class ThreeLayerEncryption {
   }
 
   // Build encrypted record and return GUID + qrKey
-  static async buildRecord(emergencyInfo, privateInfo, healthRecords, password) {
+  static async buildRecord(emergencyInfo, privateInfo, healthRecords, password, pin) {
     const guid = self.crypto.randomUUID();
     const qrKey = this.generateQrKey();
 
     const publicData = await this.encrypt(emergencyInfo, qrKey);
 
-    const gate = await this.sha256(qrKey + password);
-    const gatedPrivate = { ...privateInfo, encryptedWith: gate };
+    const pinSalt = self.crypto.getRandomValues(new Uint8Array(16));
+    const pinKey = await this.derivePinKey(pin, pinSalt);
+    const privateCipher = await this.encrypt(privateInfo, pinKey);
 
     const vaultSalt = self.crypto.getRandomValues(new Uint8Array(16));
     const vaultKey = await this.deriveKey(qrKey, vaultSalt, 100000);
@@ -110,7 +131,8 @@ class ThreeLayerEncryption {
       qrKey,
       storedData: {
         publicData,
-        privateInfo: gatedPrivate,
+        privateCipher,
+        pinSalt: this.arrayBufferToBase64(pinSalt.buffer),
         vault: {
           iv: vaultEnc.iv,
           data: vaultEnc.data,
@@ -176,7 +198,9 @@ class UnifiedHealthApp extends IKeyApp {
 }
 
 // Expose a global instance for current UI to interact with
-window.healthApp = new UnifiedHealthApp();
+if (typeof window !== 'undefined') {
+  window.healthApp = new UnifiedHealthApp();
+}
 
 // ----------------- helpers -----------------
 const state = { locations: [] }; // load from your decrypted vault on login
@@ -299,6 +323,7 @@ async function savePlaceNote(place) {
 }
 
 // ----------------- init -----------------
+if (typeof document !== 'undefined') {
 document.addEventListener("DOMContentLoaded", () => {
   const modeRadios = Array.from(document.querySelectorAll('input[name="placeMode"]'));
   const manualRow = document.getElementById("manualCoords");
@@ -433,3 +458,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderPlaces();
 });
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = { ThreeLayerEncryption };
+}

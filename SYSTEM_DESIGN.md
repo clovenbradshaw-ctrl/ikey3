@@ -46,13 +46,14 @@ The application runs entirely in the browser. `index.html` now loads the `client
   "qrKey": "<base64>",
   "storedData": {
     "publicData": { "iv": "...", "data": "..." },
-    "privateInfo": { "encryptedWith": "<sha256(qrKey+password)>", ... },
+    "privateCipher": { "iv": "...", "data": "..." },
+    "pinSalt": "<base64>",
     "vault": { "iv": "...", "data": "...", "salt": "<base64>" }
   }
 }
 ```
 * `publicData` – emergency info encrypted directly with `qrKey`.
-* `privateInfo` – profile fields gated by a SHA-256 hash of `qrKey` + password.
+* `privateCipher` – profile fields encrypted with an AES key derived from a 6‑digit PIN and random salt.
 * `vault` – health records encrypted with a key derived from `qrKey` and random salt using PBKDF2.
 
 ### 4.2 Local Storage Keys
