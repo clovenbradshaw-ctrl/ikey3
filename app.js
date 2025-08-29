@@ -157,6 +157,10 @@ class ThreeLayerEncryption {
     } catch (err) {
       throw new Error('Invalid PIN');
     }
+
+    const salt = new Uint8Array(this.base64ToArrayBuffer(storedData.pinSalt));
+    const pinKey = await this.derivePinKey(pin, salt);
+    return await this.decrypt(storedData.privateCipher, pinKey);
   }
 
   static async unlockVault(storedData, qrKey) {
