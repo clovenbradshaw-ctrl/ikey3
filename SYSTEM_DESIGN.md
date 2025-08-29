@@ -71,10 +71,11 @@ sequenceDiagram
     participant A as App
     participant E as ThreeLayerEncryption
     U->>A: Enter emergency & medical data
-    A->>E: buildRecord(info, private, vault, password)
+    A->>E: buildRecord(info, private, vault, pin)
     E->>E: generateQrKey()
     E->>E: encrypt(publicData, qrKey)
-    E->>E: sha256(qrKey+password)
+    E->>E: derivePinKey(pin, pinSalt)
+    E->>E: encrypt(private, derivedPinKey)
     E->>E: deriveKey(qrKey, salt)
     E->>E: encrypt(vault, derivedKey)
     E-->>A: guid, qrKey, storedData

@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="app.js"></script>
   <style>
     :root{--bg:#0f172a;--card:#111827;--muted:#94a3b8;--text:#e5e7eb;--accent:#22d3ee;--outline:#1f2937;--ok:#10b981;--warn:#f59e0b;--err:#ef4444}
     *{box-sizing:border-box}
@@ -148,9 +149,8 @@
 
 <script>
   // Base URL for the viewer. Override by defining window.IKEY3_VIEWER_URL
-  // before this script runs. Defaults to the parent directory of the
-  // current location.
-  const VIEWER_URL = window.IKEY3_VIEWER_URL || new URL('../', window.location.href).href;
+  // before this script runs. Defaults to the current directory.
+  const VIEWER_URL = window.IKEY3_VIEWER_URL || new URL('./', window.location.href).href;
   document.getElementById('viewerPrefix').textContent = VIEWER_URL;
 
   // ——— Helpers ———
@@ -168,7 +168,7 @@
     for (const b of arr) s += String.fromCharCode(b);
     return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   }
-  function buildUrl(guid,key,pin){
+  function buildUrl(guid,key){
     const embedded = btoa(
       JSON.stringify({
         n: cName.value.trim(),
@@ -248,7 +248,7 @@
   }
 
   function updateOutputs(){
-    const url = buildUrl(currentGUID,currentKey,pinEl.value.trim());
+    const url = buildUrl(currentGUID,currentKey);
     urlOut.textContent = url;
     renderQR(url);
   }
@@ -262,19 +262,31 @@
     updateOutputs(); showToast('New IDs generated');
   });
 
-  document.getElementById('saveClient').addEventListener('click', ()=>{
+  document.getElementById('saveClient').addEventListener('click', async ()=>{
     if(!validate()) return;
-    const clientInfo = {
+
+    const emergencyInfo = {
       name: cName.value.trim(),
-      publicInfo: {
-        bloodType: cBlood.value.trim(),
-        allergies: cAllergies.value.trim(),
-        contact: { name: ecName.value.trim(), phone: ecPhone.value.trim(), relationship: ecRel.value.trim() }
-      },
-      created: new Date().toISOString()
+      bloodType: cBlood.value.trim(),
+      allergies: cAllergies.value.trim(),
+      contact: { name: ecName.value.trim(), phone: ecPhone.value.trim(), relationship: ecRel.value.trim() }
     };
-    // In your app you might store clientInfo keyed by GUID locally or remotely.
-    // This demo intentionally avoids network I/O to keep PII on-device.
+
+    const result = await ThreeLayerEncryption.buildRecord(
+      emergencyInfo,
+      {},
+      {},
+      pinEl.value.trim()
+    );
+
+    currentGUID = result.guid;
+    currentKey = result.qrKey;
+    guidEl.value = currentGUID; keyEl.value = currentKey;
+
+    try {
+      localStorage.setItem(`clientRecord.${currentGUID}`, JSON.stringify(result.storedData));
+    } catch {}
+
     showToast('QR generated');
     updateOutputs();
   });
