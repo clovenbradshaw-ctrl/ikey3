@@ -3957,14 +3957,18 @@
              }
          }
 
-        // Add click handler for logo to return to client creator
+        // Add click handler for logo and select initial tab
         document.addEventListener('DOMContentLoaded', function() {
             const logo = document.querySelector('.logo');
             if (logo) {
                 logo.addEventListener('click', showClientCreator);
             }
-            // Always show the client creator on initial load
-            showClientCreator();
+            // If a QR hash is present, show the emergency view. Otherwise default to the client creator.
+            if (window.location.hash) {
+                showQRTab();
+            } else {
+                showClientCreator();
+            }
         });
 
          // Allow closing dev tools
