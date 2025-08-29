@@ -1724,12 +1724,13 @@
             if (enteredHash === currentBlob.pinHash) {
                 pinUnlocked = true;
                 currentPIN = enteredPin;
+                grantOwnerAccess(enteredPin);
                 closePinPad();
-                
+
                 if (window.pinCallback) {
                     window.pinCallback(true, enteredPin);
                 }
-                
+
                 // Refresh the display
                 displayEmergencyInfo(currentBlob);
             } else {
@@ -2619,14 +2620,18 @@
         }
 
         // ============= OWNER FUNCTIONS =============
+        function grantOwnerAccess(password) {
+            ownerPassword = password;
+            document.querySelector('.login-btn').style.display = 'none';
+            document.querySelector('.dashboard-btn').style.display = 'inline-block';
+            document.querySelector('.logout-btn').style.display = 'inline-block';
+            document.querySelector('.health-records-btn').style.display = 'inline-block';
+        }
+
         async function ownerLogin() {
             const password = prompt('Enter owner password:');
             if (password === 'demo123') {  // For testing
-                ownerPassword = password;
-                document.querySelector('.login-btn').style.display = 'none';
-                document.querySelector('.dashboard-btn').style.display = 'inline-block';
-                document.querySelector('.logout-btn').style.display = 'inline-block';
-                document.querySelector('.health-records-btn').style.display = 'inline-block';
+                grantOwnerAccess(password);
                 showOwnerDashboard();
             } else {
                 alert('Invalid password');
