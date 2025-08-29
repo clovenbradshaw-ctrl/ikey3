@@ -1726,7 +1726,7 @@
           const item = document.createElement('div');
           item.className = 'lang-option';
           item.dataset.lang = code;
-          item.textContent = ${code.toUpperCase()} ${LANGUAGE_NAMES[code] || code};
+          item.textContent = `${code.toUpperCase()} ${LANGUAGE_NAMES[code] || code}`;
           item.setAttribute('dir', 'auto');
           item.addEventListener('click', () => {
             setLanguage(code);
@@ -3103,14 +3103,14 @@
             document.getElementById('password').addEventListener('input', () => {
                 const pwd = document.getElementById('password').value;
                 const strengthEl = document.getElementById('password-strength');
-                strengthEl.textContent = Strength: ${getPasswordStrength(pwd)};
+                strengthEl.textContent = `Strength: ${getPasswordStrength(pwd)}`;
             });
 
             // Critical info character counter
             const ci = document.getElementById('critical-info');
             const counter = ci.parentElement.querySelector('.char-counter');
             ci.addEventListener('input', () => {
-                counter.textContent = ${ci.value.length}/100;
+                counter.textContent = `${ci.value.length}/100`;
             });
         }
 
