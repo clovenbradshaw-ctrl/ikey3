@@ -1,7 +1,7 @@
 # System Design Document for iKey App
 
 ## 1. Overview
-The iKey app is a browser-based emergency information manager that lets users create a secure QR code containing medical and contact details. It provides modules for storing health records, adjusting text size for accessibility, managing session security, and accessing location-based 911 assistance. All data is stored client-side with strong encryption, enabling offline use and enhancing privacy.
+The iKey app is a browser-based emergency information manager that lets users create a secure QR code containing medical and contact details. It provides modules for storing health records, bookmarking locations, adjusting text size for accessibility, managing session security, and accessing location-based 911 assistance with SMS availability checks. All data is stored client-side with strong encryption, enabling offline use and enhancing privacy.
 
 ## 2. High-Level Architecture
 ```mermaid
@@ -19,7 +19,8 @@ The application runs entirely in the browser. `index.html` orchestrates loading 
 ## 3. Components
 ### 3.1 Core Logic (app.js)
 * `ThreeLayerEncryption` implements key generation, hashing, and AES-GCM encryption for QR payloads, profile data, and the double-wrapped vault that holds health records.
-* Location bookmarking, note taking, and other UI logic reside in this file.
+* `UnifiedHealthApp` manages the personal health vault, handles attachment creation/import/export, and exposes a global instance for UI modules.
+* Location bookmarking and geolocated notes use device GPS or manual entry, with category tags and Google Maps embeds.
 
 ### 3.2 Medication Search (medication.js)
 * `MedicationSearch` queries the DrugBank API to autocomplete medication names and display dosage details.
@@ -32,6 +33,11 @@ The application runs entirely in the browser. `index.html` orchestrates loading 
 ### 3.4 Text Size Controller (text-size.js)
 * Provides accessible font scaling across the main document and embedded iframes.
 * Persists user selection in `localStorage` and synchronizes across tabs via the `storage` event.
+
+### 3.5 Emergency Text Helper (text-911.html)
+* Obtains device coordinates and reverse geocodes via Nominatim.
+* Cross-references a local `911-texting.json` dataset to indicate whether SMS to 911 is supported in the current county.
+* Prepares a pre-filled SMS message with location details and opens the user's texting app if service is available.
 
 ## 4. Data Model
 ### 4.1 Encrypted Record Structure
@@ -56,6 +62,9 @@ The application runs entirely in the browser. `index.html` orchestrates loading 
 * `ikey_text_size` – user’s preferred font scale.
 * `ikey.places.draft` – cached location notes.
 * `ikey_preferred_language` – UI language preference.
+
+### 4.3 Text 911 Dataset
+* `911-texting.json` – static list of U.S. PSAPs and counties offering SMS-to-911 service; used offline by the emergency text helper.
 
 ## 5. Data Flow
 ### 5.1 QR Record Creation
@@ -86,9 +95,28 @@ sequenceDiagram
     Session->>Archive: sendBeacon(JSON draft)
 ```
 
+### 5.3 Text 911 Lookup
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant Geo as Geolocation
+    participant N as Nominatim
+    participant D as Dataset
+    participant UI
+    U->>Geo: Request location
+    Geo-->>UI: Coordinates
+    UI->>N: Reverse geocode(coords)
+    N-->>UI: State & county
+    UI->>D: Check availability
+    D-->>UI: SMS support
+    UI-->>U: Show texting option
+```
+
 ## 6. External Services & APIs
 * **DrugBank API** – medication autocomplete and metadata retrieval.
-* **Geolocation API** – obtains device coordinates for the 911 helper page.
+* **Geolocation API** – obtains device coordinates for location features.
+* **OpenStreetMap Nominatim** – reverse geocodes coordinates and finds cross streets in the text-911 helper.
+* **Google Maps** – provides map embeds and links for saved locations.
 * **WebCrypto** – all cryptographic operations (key derivation, hashing, AES-GCM).
 * **Wayback Machine** – optional archival storage via `sendBeacon`.
 
