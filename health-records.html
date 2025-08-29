@@ -1,0 +1,3395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electronic Health Records - Secure Medical Record</title>
+    <link rel="icon" href="https://storage.googleapis.com/art_homelessness/favicon.ico">
+    <script src="router.js"></script>
+    <style>
+        @page {
+            size: letter;
+            margin: 0.5in;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --top-bar-height: 0px;
+            --nav-tabs-height: 0px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            font-size: 0.9167rem;
+            line-height: 1.5;
+            color: #1e293b;
+            background: white;
+            padding: 20px;
+            padding-top: calc(var(--top-bar-height) + var(--nav-tabs-height) + 20px);
+        }
+        
+        .security-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            color: white;
+            padding: 8px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 48px;
+        }
+        
+        .save-status {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin: 0 10px;
+        }
+        
+        .save-status.never-saved {
+            background: #dc2626;
+            color: white;
+        }
+        
+        .save-status.unsaved {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .save-status.saved {
+            background: #22c55e;
+            color: white;
+        }
+        
+        .security-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9167rem;
+            flex-shrink: 0;
+        }
+        
+        .status-icon {
+            width: 0.875rem;
+            height: 0.875rem;
+            border-radius: 50%;
+            background: #22c55e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .status-icon::after {
+            content: "✓";
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            flex-grow: 0;
+            flex-shrink: 0;
+        }
+
+        .size-controls {
+            display: flex;
+            gap: 4px;
+        }
+
+        .size-toggle {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        
+        .btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-save {
+            background: #dc2626;
+            color: white;
+            font-weight: 600;
+            animation: ehr-pulse 2s infinite;
+        }
+
+        .btn-save.saved {
+            background: #22c55e;
+            animation: none;
+        }
+
+        @keyframes ehr-pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+        
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #475569;
+        }
+        
+        .btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .btn-lock {
+            background: #059669;
+            color: white;
+        }
+        
+        .btn-lock:hover {
+            background: #047857;
+        }
+        
+        .btn-locked {
+            background: #dc2626;
+            color: white;
+        }
+        
+        .nav-tabs {
+            position: fixed;
+            top: var(--top-bar-height);
+            left: 0;
+            right: 0;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            z-index: 999;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 0 20px;
+            scrollbar-width: thin;
+        }
+        
+        .nav-tabs::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .nav-tabs::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+        
+        .tab {
+            display: inline-block;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            font-size: 0.8333rem;
+            font-weight: 500;
+            color: #64748b;
+        }
+        
+        .tab:hover {
+            color: #1e293b;
+            background: #f1f5f9;
+        }
+        
+        .tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .main-content {
+            margin-top: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #3b82f6;
+        }
+        
+        .header h1 {
+            color: #3b82f6;
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: #64748b;
+            font-size: 0.8333rem;
+        }
+        
+        .last-updated {
+            font-weight: 600;
+            color: #3b82f6;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+            scroll-margin-top: calc(var(--top-bar-height) + var(--nav-tabs-height));
+        }
+        
+        .section-header {
+            background: #f8fafc;
+            padding: 10px 15px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 15px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .section-header::after {
+            content: "\25BC";
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: transform 0.2s;
+        }
+
+        .section.collapsed .section-header::after {
+            transform: translateY(-50%) rotate(-90deg);
+        }
+
+        .section.collapsed > :not(.section-header) {
+            display: none;
+        }
+        
+        .section-header.gac {
+            border-left-color: #8b5cf6;
+            background: #f3f0ff;
+        }
+        
+        .section-header.emergency-plans {
+            border-left-color: #dc2626;
+            background: #fee2e2;
+        }
+        
+        .section-header h2 {
+            font-size: 1.3333rem;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .field-group {
+            margin-bottom: 15px;
+        }
+        
+        .field-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .field {
+            flex: 1;
+            margin-bottom: 12px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.8333rem;
+            color: #334155;
+            margin-bottom: 3px;
+        }
+        
+        .required::after {
+            content: " *";
+            color: #ef4444;
+        }
+        
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        input[type="tel"],
+        input[type="email"],
+        input[type="password"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 0.8333rem;
+            background: white;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 5px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 0.75rem;
+        }
+        
+        .warning-box {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 0.75rem;
+        }
+        
+        .danger-box {
+            background: #fee2e2;
+            border: 1px solid #dc2626;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 0.8333rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .safety-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        
+        .safety-green {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .safety-yellow {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .safety-red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .scale-group {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .scale-item {
+            width: 35px;
+            height: 35px;
+            border: 2px solid #cbd5e1;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .scale-item:hover {
+            background: #f1f5f9;
+        }
+        
+        .scale-item.selected {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        
+        .provider-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f8fafc;
+            position: relative;
+        }
+        
+        .provider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+        
+        .list-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f8fafc;
+            position: relative;
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+        
+        .add-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        
+        .add-btn:hover {
+            background: #2563eb;
+        }
+        
+        .timeline-item {
+            border-left: 3px solid #8b5cf6;
+            padding-left: 20px;
+            margin-left: 10px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: -8px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            background: #8b5cf6;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #8b5cf6;
+        }
+        
+        .privacy-level {
+            border: 2px solid #3b82f6;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+            background: #f0f9ff;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: auto;
+            height: auto;
+            z-index: 2000;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .modal::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-header {
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h3 {
+            font-size: 1.5rem;
+            color: #1e293b;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .password-strength {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .strength-bar {
+            flex: 1;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+        }
+        
+        .strength-bar.active {
+            background: #22c55e;
+        }
+        
+        .strength-bar.weak {
+            background: #dc2626;
+        }
+        
+        .strength-bar.medium {
+            background: #f59e0b;
+        }
+        
+        .emergency-content {
+            filter: blur(5px);
+            user-select: none;
+            pointer-events: none;
+        }
+        
+        .emergency-content.unlocked {
+            filter: none;
+            user-select: auto;
+            pointer-events: auto;
+        }
+        
+        .unlock-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 0.8333rem;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        
+        .unlock-btn:hover {
+            background: #b91c1c;
+        }
+        
+        .inactive-provider {
+            opacity: 0.6;
+            background: #f1f5f9;
+        }
+        
+        .provider-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        #lockTimer {
+            margin-left: 8px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+            }
+            
+            .security-bar,
+            .nav-tabs,
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .context-group {
+            border: 2px solid #8b5cf6;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            background: #faf5ff;
+        }
+        
+        h3 {
+            font-size: 1.0833rem;
+            color: #1e293b;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        #lockTimer {
+            margin-left: 10px;
+            font-size: 0.8333rem;
+            color: #94a3b8;
+        }
+        
+        .file-input-label {
+            display: inline-block;
+            padding: 6px 16px;
+            background: #64748b;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8333rem;
+        }
+        
+        .file-input-label:hover {
+            background: #475569;
+        }
+        
+        @media (max-width: 1200px) {
+            .security-bar {
+                padding: 8px 12px;
+            }
+            
+            .btn {
+                padding: 4px 10px;
+                font-size: 0.75rem;
+            }
+            
+            .save-status {
+                font-size: 0.6667rem;
+                padding: 3px 8px;
+            }
+            
+            .security-status {
+                font-size: 0.8333rem;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .security-bar {
+                justify-content: center;
+                text-align: center;
+            }
+            
+            .security-status {
+                width: 100%;
+                justify-content: center;
+                margin-right: 0;
+                margin-bottom: 5px;
+            }
+            
+            .save-status {
+                width: 100%;
+                justify-content: center;
+                margin-bottom: 5px;
+            }
+            
+            .action-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .field-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            body {
+                padding: 10px;
+            }
+
+            .nav-tabs {
+                padding: 0 10px;
+            }
+
+            .tab {
+                padding: 10px 15px;
+                font-size: 0.75rem;
+            }
+        }
+        /* Session timer styles */
+        .session-timer {
+            --progress: 0deg;
+            --ring-color: #4caf50;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: conic-gradient(var(--ring-color) var(--progress), #e0e0e0 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-left: 10px;
+        }
+        .session-timer::before {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            background: white;
+            border-radius: 50%;
+        }
+        .session-timer span {
+            font-size: 10px;
+            position: relative;
+        }
+        .session-timer.pulse {
+            animation: ehr-timer-pulse 1s infinite;
+        }
+        @keyframes ehr-timer-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
+        }
+        .session-banner {
+            position: fixed;
+            top: -100px;
+            left: 0;
+            right: 0;
+            background: #fff3cd;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: top 0.3s;
+            z-index: 1000;
+        }
+        .session-banner.active {
+            top: 0;
+        }
+        .session-banner button {
+            margin-left: 10px;
+        }
+        .session-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .session-modal.active {
+            display: flex;
+        }
+        .session-modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            animation: modalPulse 1s infinite alternate;
+        }
+        @keyframes modalPulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.02); }
+        }
+        .session-expired {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+        }
+        .session-expired.active {
+            display: flex;
+        }
+    </style>
+    <script src="text-size.js"></script>
+</head>
+<body>
+    <div class="security-bar no-print">
+        <div class="security-status">
+            <div class="status-icon"></div>
+            <span id="securityText">Always Encrypted at Rest</span>
+            <span id="lockTimer"></span>
+        </div>
+        <div class="save-status never-saved" id="saveStatus">
+            ⚠️ Never Saved - Not Archived
+        </div>
+        <div class="action-buttons">
+            <button class="btn btn-secondary" id="backBtn">Dashboard</button>
+            <button class="btn btn-lock" id="lockBtn" style="display: none;">🔓 Lock</button>
+            <button class="btn btn-secondary" id="exportBtn">Export/Print</button>
+            <button class="btn btn-secondary" id="changePasswordBtn" style="display: none;">Change Password</button>
+            <button class="btn btn-save" id="saveBtn">Save to Archive.org</button>
+            <div class="size-controls">
+                <button class="size-toggle" onclick="changeTextSize(-1)">🔍-</button>
+                <button class="size-toggle" onclick="changeTextSize(1)">🔍+</button>
+            </div>
+            <div id="session-timer" class="session-timer">
+                <span id="session-countdown"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-tabs no-print" id="navTabs">
+        <div class="tab active" data-section="identity">Identity & Safety</div>
+        <div class="tab" data-section="personal">Personal Info</div>
+        <div class="tab" data-section="notes">Case Notes</div>
+        <div class="tab" data-section="emergency">Emergency</div>
+        <div class="tab" data-section="providers">Providers</div>
+        <div class="tab" data-section="insurance">Insurance</div>
+        <div class="tab" data-section="medical">Medical History</div>
+        <div class="tab" data-section="medications">Medications</div>
+        <div class="tab" data-section="gac">Gender Affirming Care</div>
+        <div class="tab" data-section="emergency-plans">🆘 Emergency Plans</div>
+    </div>
+
+    <!-- Password Modal -->
+    <div class="modal" id="passwordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Set Encryption Password</h3>
+            </div>
+            <div class="modal-body">
+                <div class="field">
+                    <label>Password</label>
+                    <input type="password" id="modalPassword" placeholder="Enter password">
+                    <div class="password-strength" id="passwordStrength" style="display: none;">
+                        <div class="strength-bar" id="strength1"></div>
+                        <div class="strength-bar" id="strength2"></div>
+                        <div class="strength-bar" id="strength3"></div>
+                        <div class="strength-bar" id="strength4"></div>
+                    </div>
+                </div>
+                <div class="field" id="confirmPasswordField">
+                    <label>Confirm Password</label>
+                    <input type="password" id="modalConfirmPassword" placeholder="Confirm password">
+                </div>
+                <p style="font-size: 0.75rem; color: #64748b; margin-top: 10px;">
+                    Use a strong password to protect your medical information. For security, use a password different from other accounts.
+                    This password cannot be recovered if lost.
+                    <br><strong>Note:</strong> Session auto-locks after 45 minutes of inactivity.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalCancel">Cancel</button>
+                <button class="btn btn-primary" id="modalSubmit">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- First Time User Modal -->
+    <div class="modal" id="firstTimeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚠️ Important: Data Storage Notice</h3>
+            </div>
+            <div class="modal-body">
+                <div class="danger-box">
+                    This app stores data securely in your browser and archives it online.<br>
+                    Your data is saved to archive.org for permanent storage.
+                </div>
+                <p style="margin-top: 15px;">
+                    <strong>How it works:</strong>
+                </p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Your data is encrypted and private</li>
+                    <li>Data is automatically sent to archive.org</li>
+                    <li>Clearing browser data will not delete archived information</li>
+                </ul>
+                <p style="margin-top: 15px;">
+                    Data auto-saves on edit. You can also click "Save to Archive.org" to manually save.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="firstTimeClose">I Understand</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <div class="header" id="documentHeader">
+            <h1>🏥 Electronic Health Records</h1>
+            <p>Comprehensive Medical Record & Care Documentation</p>
+            <p style="margin-top: 10px;">Last Updated: <span class="last-updated" id="lastUpdated">Never</span><br><small id="hr-source"></small></p>
+        </div>
+
+        <!-- Identity & Safety Preferences Section -->
+        <div class="section" id="identity-section">
+            <div class="section-header">
+                <h2>👤 Identity & Safety Preferences</h2>
+            </div>
+            
+            <div class="info-box">
+                <strong>Important:</strong> This section helps ensure your safety and proper name/pronoun usage across different contexts.
+            </div>
+            
+            <div class="field-row">
+                <div class="field">
+                    <label class="required">Chosen Name (Name I use daily)</label>
+                    <input type="text" class="form-data" data-field="chosenName" />
+                </div>
+                <div class="field">
+                    <label class="required">My Pronouns</label>
+                    <input type="text" class="form-data" data-field="pronouns" placeholder="e.g., she/her, they/them, he/him" />
+                </div>
+            </div>
+            
+            <div class="context-group">
+                <h3>Context-Specific Usage</h3>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="different-contexts" class="form-data" data-field="differentContexts">
+                    <label for="different-contexts">I need different names/pronouns in different situations</label>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <div class="field-row">
+                        <div class="field">
+                            <label>Legal Name (for official documents)</label>
+                            <input type="text" class="form-data" data-field="legalName" />
+                        </div>
+                        <div class="field">
+                            <label>Legal Name Pronouns</label>
+                            <input type="text" class="form-data" data-field="legalPronouns" />
+                        </div>
+                    </div>
+                    
+                    <label style="margin-top: 10px;">When to use legal name:</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="insurance-claims" class="form-data" data-field="useForInsurance">
+                            <label for="insurance-claims">Insurance claims</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="prescriptions" class="form-data" data-field="useForPrescriptions">
+                            <label for="prescriptions">Prescriptions</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="legal-docs" class="form-data" data-field="useForLegalDocs">
+                            <label for="legal-docs">Legal documents</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="lab-orders" class="form-data" data-field="useForLabOrders">
+                            <label for="lab-orders">Lab orders</label>
+                        </div>
+                    </div>
+                    
+                    <div class="field" style="margin-top: 10px;">
+                        <label>Other situations requiring legal name:</label>
+                        <textarea rows="2" class="form-data" data-field="otherLegalNameSituations"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="warning-box">
+                <h3>⚠️ Safety Notes</h3>
+                <div class="field">
+                    <label>Situations where legal name MUST be used:</label>
+                    <textarea rows="2" class="form-data" data-field="mustUseLegalName"></textarea>
+                </div>
+                <div class="field">
+                    <label>People who should NOT know chosen name:</label>
+                    <textarea rows="2" class="form-data" data-field="doNotShareChosenName"></textarea>
+                </div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="voicemail-safe" class="form-data" data-field="voicemailSafe">
+                        <label for="voicemail-safe">Safe to leave voicemails using chosen name</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="mail-safe" class="form-data" data-field="mailSafe">
+                        <label for="mail-safe">Safe to send mail using chosen name</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Information Section -->
+        <div class="section" id="personal-section">
+            <div class="section-header">
+                <h2>📋 Personal Information</h2>
+            </div>
+            
+            <div class="grid-3">
+                <div class="field">
+                    <label>First Name</label>
+                    <input type="text" class="form-data" data-field="firstName" />
+                </div>
+                <div class="field">
+                    <label>Last Name</label>
+                    <input type="text" class="form-data" data-field="lastName" />
+                </div>
+                <div class="field">
+                    <label>Date of Birth</label>
+                    <input type="date" class="form-data" data-field="dateOfBirth" />
+                </div>
+            </div>
+            
+            <div class="grid-2">
+                <div class="field">
+                    <label>Gender Identity</label>
+                    <select class="form-data" data-field="genderIdentity">
+                        <option value="">Select...</option>
+                        <option>Woman</option>
+                        <option>Man</option>
+                        <option>Non-binary</option>
+                        <option>Genderfluid</option>
+                        <option>Agender</option>
+                        <option>Two-Spirit</option>
+                        <option>Prefer not to say</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Sex Assigned at Birth</label>
+                    <select class="form-data" data-field="sexAssignedAtBirth">
+                        <option value="">Select...</option>
+                        <option>Female</option>
+                        <option>Male</option>
+                        <option>Intersex</option>
+                        <option>Prefer not to say</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid-3">
+                <div class="field">
+                    <label>Phone</label>
+                    <input type="tel" class="form-data" data-field="phone" />
+                </div>
+                <div class="field">
+                    <label>Email</label>
+                    <input type="email" class="form-data" data-field="email" />
+                </div>
+                <div class="field">
+                    <label>Social Security Number</label>
+                    <input type="text" class="form-data" data-field="ssn" placeholder="XXX-XX-XXXX" />
+                </div>
+            </div>
+            
+            <div class="field">
+                <label>Address</label>
+                <textarea rows="2" class="form-data" data-field="address"></textarea>
+            </div>
+        </div>
+
+        <!-- Case Notes Section -->
+        <div class="section" id="notes-section">
+            <div class="section-header">
+                <h2>📝 Case Notes & Health Journal</h2>
+            </div>
+            
+            <div class="info-box">
+                Use this section to track appointments, symptoms, and your health journey over time.
+            </div>
+            
+            <div id="notes-container"></div>
+            <button class="add-btn no-print" id="addNoteBtn">+ Add Note</button>
+        </div>
+
+        <!-- Healthcare Providers Section -->
+        <div class="section" id="providers-section">
+            <div class="section-header">
+                <h2>👩‍⚕️ Healthcare Providers</h2>
+            </div>
+            
+            <div id="providers-container"></div>
+            <button class="add-btn no-print" id="addProviderBtn">+ Add Provider</button>
+        </div>
+
+        <!-- Insurance Information Section -->
+        <div class="section" id="insurance-section">
+            <div class="section-header">
+                <h2>🏥 Insurance Information</h2>
+            </div>
+            
+            <h3>Primary Insurance</h3>
+            <div class="grid-3">
+                <div class="field">
+                    <label>Insurance Company</label>
+                    <input type="text" class="form-data" data-field="insuranceCompany" />
+                </div>
+                <div class="field">
+                    <label>Member/Subscriber ID</label>
+                    <input type="text" class="form-data" data-field="memberId" />
+                </div>
+                <div class="field">
+                    <label>Group Number</label>
+                    <input type="text" class="form-data" data-field="groupNumber" />
+                </div>
+            </div>
+            
+            <div class="grid-3">
+                <div class="field">
+                    <label>Policy Holder Name</label>
+                    <input type="text" class="form-data" data-field="policyHolderName" />
+                </div>
+                <div class="field">
+                    <label>Policy Holder DOB</label>
+                    <input type="date" class="form-data" data-field="policyHolderDOB" />
+                </div>
+                <div class="field">
+                    <label>Relationship to Policy Holder</label>
+                    <select class="form-data" data-field="relationshipToPolicyHolder">
+                        <option value="">Select...</option>
+                        <option>Self</option>
+                        <option>Spouse</option>
+                        <option>Child</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid-3">
+                <div class="field">
+                    <label>Insurance Phone</label>
+                    <input type="tel" class="form-data" data-field="insurancePhone" />
+                </div>
+                <div class="field">
+                    <label>Plan Type</label>
+                    <select class="form-data" data-field="planType">
+                        <option value="">Select...</option>
+                        <option>HMO</option>
+                        <option>PPO</option>
+                        <option>POS</option>
+                        <option>EPO</option>
+                        <option>HDHP</option>
+                        <option>Medicare</option>
+                        <option>Medicaid</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Annual Deductible</label>
+                    <input type="text" class="form-data" data-field="annualDeductible" placeholder="e.g., $1,500" />
+                </div>
+            </div>
+            
+            <div class="grid-3">
+                <div class="field">
+                    <label>Copay (Primary Care)</label>
+                    <input type="text" class="form-data" data-field="primaryCareCopay" placeholder="e.g., $25" />
+                </div>
+                <div class="field">
+                    <label>Copay (Specialist)</label>
+                    <input type="text" class="form-data" data-field="specialistCopay" placeholder="e.g., $50" />
+                </div>
+                <div class="field">
+                    <label>Out-of-Pocket Maximum</label>
+                    <input type="text" class="form-data" data-field="outOfPocketMax" placeholder="e.g., $6,000" />
+                </div>
+            </div>
+            
+            <div class="field">
+                <label>Insurance Address</label>
+                <textarea rows="2" class="form-data" data-field="insuranceAddress" placeholder="Claims mailing address"></textarea>
+            </div>
+            
+            <div class="field">
+                <label>Coverage Notes</label>
+                <textarea rows="3" class="form-data" data-field="coverageNotes" placeholder="Prior authorization requirements, covered services, exclusions, etc."></textarea>
+            </div>
+        </div>
+
+        <!-- Medical History Section -->
+        <div class="section" id="medical-section">
+            <div class="section-header">
+                <h2>🩺 Medical History</h2>
+            </div>
+            
+            <h3>Current Conditions</h3>
+            <div id="conditions-container"></div>
+            <button class="add-btn no-print" id="addConditionBtn">+ Add Condition</button>
+            
+            <h3>Past Surgeries</h3>
+            <div id="past-surgeries-container"></div>
+            <button class="add-btn no-print" id="addPastSurgeryBtn">+ Add Surgery</button>
+            
+            <div class="field">
+                <label>Family History</label>
+                <textarea rows="4" class="form-data" data-field="familyHistory" placeholder="Important family medical history..."></textarea>
+            </div>
+        </div>
+
+        <!-- Medications Section -->
+        <div class="section" id="medications-section">
+            <div class="section-header">
+                <h2>💊 Medications & Allergies</h2>
+            </div>
+            
+            <h3>Current Medications</h3>
+            <div id="medications-container"></div>
+            <button class="add-btn no-print" id="addMedicationBtn">+ Add Medication</button>
+            
+            <h3>Allergies</h3>
+            <div class="field">
+                <label>Medication Allergies</label>
+                <textarea rows="3" class="form-data" data-field="medicationAllergies" placeholder="List any drug allergies and reactions..."></textarea>
+            </div>
+            <div class="field">
+                <label>Other Allergies</label>
+                <textarea rows="3" class="form-data" data-field="otherAllergies" placeholder="Food, environmental allergies..."></textarea>
+            </div>
+        </div>
+
+        <!-- Gender Affirming Care Section -->
+        <div class="section" id="gac-section">
+            <div class="section-header gac">
+                <h2>🏳️‍⚧️ Gender Affirming Care</h2>
+            </div>
+            
+            <h3>Hormone Therapy</h3>
+            <div class="grid-2">
+                <div class="field">
+                    <label>HRT Status</label>
+                    <select class="form-data" data-field="hrtStatus">
+                        <option value="">Select...</option>
+                        <option>Not Started</option>
+                        <option>Active</option>
+                        <option>Paused</option>
+                        <option>Discontinued</option>
+                        <option>Considering</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>HRT Start Date</label>
+                    <input type="date" class="form-data" data-field="hrtStartDate" />
+                </div>
+            </div>
+            
+            <div class="field">
+                <label>Current Hormone Regimen</label>
+                <textarea rows="3" class="form-data" data-field="hormoneRegimen" placeholder="List medications, doses, and frequency"></textarea>
+            </div>
+            
+            <div class="grid-2">
+                <div class="field">
+                    <label>Prescribing Provider</label>
+                    <input type="text" class="form-data" data-field="hrtProvider" />
+                </div>
+                <div class="field">
+                    <label>Preferred Pharmacy for HRT</label>
+                    <input type="text" class="form-data" data-field="hrtPharmacy" />
+                </div>
+            </div>
+            
+            <div class="field">
+                <label>Lab Monitoring Schedule</label>
+                <textarea rows="2" class="form-data" data-field="labMonitoring" placeholder="Blood work frequency and tests"></textarea>
+            </div>
+            
+            <h3>Gender-Affirming Surgeries</h3>
+            <div id="surgeries-container"></div>
+            <button class="add-btn no-print" id="addSurgeryBtn">+ Add Surgery</button>
+            
+            <div class="field">
+                <label>Planned/Desired Surgeries</label>
+                <textarea rows="3" class="form-data" data-field="plannedSurgeries" placeholder="Future surgical goals and timeline"></textarea>
+            </div>
+            
+            <h3>Support & Care Team</h3>
+            <div class="field">
+                <label>Mental Health Provider</label>
+                <input type="text" class="form-data" data-field="mentalHealthProvider" />
+            </div>
+            <div class="field">
+                <label>Support Groups</label>
+                <textarea rows="2" class="form-data" data-field="supportGroups" placeholder="Groups you attend or are interested in"></textarea>
+            </div>
+            <div class="field">
+                <label>Insurance Coverage Notes</label>
+                <textarea rows="3" class="form-data" data-field="gacInsuranceNotes" placeholder="Coverage for GAC, exclusions, appeals, etc."></textarea>
+            </div>
+        </div>
+
+        <!-- Emergency Safety Plans Section -->
+        <div class="section" id="emergency-plans-section">
+            <div class="section-header emergency-plans">
+                <h2>🆘 Emergency Safety Plans</h2>
+            </div>
+            
+            <div class="danger-box no-print">
+                This section contains sensitive safety information. Password required to view.
+            </div>
+            
+            <button class="unlock-btn no-print" id="unlockEmergencyBtn">Unlock Emergency Plans</button>
+            
+            <div class="emergency-content" id="emergencyContent">
+                <h3>Crisis Resources</h3>
+                <div class="field">
+                    <label>Crisis Hotlines</label>
+                    <textarea rows="3" class="form-data" data-field="crisisHotlines" placeholder="24/7 hotlines, text lines, warm lines..."></textarea>
+                </div>
+                
+                <h3>Safe Places & People</h3>
+                <div class="field">
+                    <label>Safe Places to Go</label>
+                    <textarea rows="3" class="form-data" data-field="safePlaces" placeholder="Friends' homes, shelters, community centers..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Trusted Friends/Chosen Family</label>
+                    <textarea rows="3" class="form-data" data-field="trustedPeople" placeholder="People who can help in crisis..."></textarea>
+                </div>
+                
+                <h3>Personal Safety Strategies</h3>
+                <div class="field">
+                    <label>De-escalation Techniques That Work for Me</label>
+                    <textarea rows="3" class="form-data" data-field="deescalationTechniques" placeholder="Breathing exercises, grounding techniques, etc..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Warning Signs to Watch For</label>
+                    <textarea rows="3" class="form-data" data-field="warningSignsSafety" placeholder="Personal triggers, dangerous situations..."></textarea>
+                </div>
+                
+                <h3>Medical Emergency Information</h3>
+                <div class="field">
+                    <label>Medications in Emergency</label>
+                    <textarea rows="3" class="form-data" data-field="emergencyMedications" placeholder="PRN medications, emergency doses..."></textarea>
+                </div>
+                <div class="field">
+                    <label>What Healthcare Providers Need to Know in Crisis</label>
+                    <textarea rows="3" class="form-data" data-field="crisisProviderInfo" placeholder="Important medical info for emergency situations..."></textarea>
+                </div>
+                
+                <h3>Personal Safety Plan</h3>
+                <div class="field">
+                    <label>My Safety Plan</label>
+                    <textarea rows="6" class="form-data" data-field="personalSafetyPlan" placeholder="Step-by-step plan for staying safe..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Privacy Level -->
+        <div class="section" id="privacy-section">
+            <div class="privacy-level">
+                <h3>📄 Document Privacy Level</h3>
+                <p style="margin-bottom: 10px;">Select how this document should be shared:</p>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="level1" class="form-data" data-field="privacyLevel1">
+                        <label for="level1">Level 1: Full information (for personal use only)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="level2" class="form-data" data-field="privacyLevel2">
+                        <label for="level2">Level 2: Mixed (hide specific safety notes)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="level3" class="form-data" data-field="privacyLevel3">
+                        <label for="level3">Level 3: Legal name only (for sharing with unsafe providers)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="level4" class="form-data" data-field="privacyLevel4">
+                        <label for="level4">Level 4: Custom - exclude sections: <input type="text" class="form-data" data-field="privacyLevel4Sections" style="display: inline; width: 200px;" /></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <div class="info-box" style="margin-top: 30px;">
+            <strong>Remember:</strong> This document contains sensitive medical information. Store securely and share only with trusted healthcare providers and individuals. Update regularly to maintain accuracy.
+            <br><br>
+            <strong>Keyboard Shortcuts:</strong> Ctrl+S (or Cmd+S) to save to archive
+        </div>
+    </div>
+
+    <script src="session.js"></script>
+    <script>
+        const ARCHIVE_BASE = 'https://archive.org/download/zuboff/';
+        const XANO_BASE = 'https://xvkq-pq7i-idtl.n7d.xano.io/api:Hj4C6PGO';
+        const WEBHOOK_URL = 'https://n8n.intelechia.com/webhook/d5e99c29-2cf1-44c1-b5b4-95a1ca048441';
+
+        // Application class to manage state and functionality
+        class HealthVaultApp {
+            constructor() {
+                this.hasUnsavedChanges = false;
+                this.lastSaveTime = null;
+                this.saveReminderTimeout = null;
+                this.autoSaveTimeout = null;
+                this.isFirstTime = localStorage.getItem('phvFirstTime') !== 'false';
+                this.emergencyUnlocked = false;
+                this.sessionPassword = null;
+                this.isLocked = false;
+                this.lastActivityTime = Date.now();
+                this.lockTimeout = null;
+                this.timerInterval = null;
+                this.loaded = false;
+
+                // Record identifier
+                // Prefer existing GUID from parent window, localStorage or URL
+                const urlParams = new URLSearchParams(window.location.search);
+                this.guid = (window.parent && window.parent.currentGUID)
+                    || localStorage.getItem('ikey_current_guid')
+                    || urlParams.get('guid')
+                    || window.location.hash.slice(1)
+                    || window.crypto.randomUUID();
+                
+                // Dynamic data structure
+                this.dynamicData = {
+                    providers: [],
+                    medications: [],
+                    conditions: [],
+                    surgeries: [],
+                    pastSurgeries: [],
+                    notes: []
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.setupSectionToggles();
+                this.trackActivity();
+
+                // Use password from main app if available
+                this.sessionPassword = (window.parent && window.parent.ownerPassword) ||
+                    sessionStorage.getItem('ownerPassword');
+
+                // Start in a locked state but auto-unlock if password exists
+                this.lockFile();
+                if (this.sessionPassword) {
+                    if (this.isFirstTime) {
+                        document.getElementById('firstTimeModal').classList.add('active');
+                        localStorage.setItem('phvFirstTime', 'false');
+                    }
+                    document.getElementById('lockBtn').style.display = 'inline-block';
+                    document.getElementById('changePasswordBtn').style.display = 'inline-block';
+                    this.completeUnlock();
+                } else {
+                    if (this.isFirstTime) {
+                        document.getElementById('firstTimeModal').classList.add('active');
+                        localStorage.setItem('phvFirstTime', 'false');
+                    } else {
+                        this.showPasswordModal('Set Password for Encryption', true, 'unlock');
+                    }
+                }
+
+                // Update save status
+                this.updateSaveStatus();
+
+                // Ensure emergency content starts locked
+                document.getElementById('emergencyContent').classList.remove('unlocked');
+            }
+
+            async loadArchiveData() {
+                try {
+                    let archiveData = null;
+                    let source = '';
+
+                    try {
+                        const resp = await fetch(
+                            `${XANO_BASE}/ikey_cache?guid=${encodeURIComponent(this.guid)}`,
+                            { method: 'GET', mode: 'cors', cache: 'no-store' }
+                        );
+                        if (resp.ok) {
+                            archiveData = await resp.json();
+                            source = 'Server cache';
+                        }
+                    } catch (e) {
+                        console.log('Cache fetch failed:', e.message);
+                    }
+
+                    if (!archiveData) {
+                        const archiveUrl = `${ARCHIVE_BASE}${this.guid}.json?ts=${Date.now()}`;
+                        const response = await fetch(archiveUrl, { mode: 'cors', cache: 'no-store' });
+                        if (!response.ok) return;
+                        archiveData = await response.json();
+                        source = 'Archive.org';
+                    }
+
+                    const payload = await this.crypto.decrypt(archiveData.data, this.sessionPassword);
+                    if (payload.healthRecords) {
+                        this.loadFormData(payload.healthRecords);
+                        const src = document.getElementById('hr-source');
+                        if (src) src.textContent = `Source: ${source}`;
+                    }
+                } catch (e) {
+                    console.warn('No existing health records found', e);
+                } finally {
+                    this.loaded = true;
+                }
+            }
+            
+            setupEventListeners() {
+                // Navigation tabs
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => this.navigateToSection(e));
+                });
+                
+                // Buttons
+                document.getElementById('saveBtn').addEventListener('click', () => { this.saveData().catch(console.error); });
+                document.getElementById('exportBtn').addEventListener('click', () => this.exportPDF());
+                document.getElementById('lockBtn').addEventListener('click', () => this.toggleLock());
+                document.getElementById('changePasswordBtn').addEventListener('click', () => this.changePassword());
+                document.getElementById('unlockEmergencyBtn').addEventListener('click', () => this.unlockEmergencyPlans());
+                document.getElementById('backBtn').addEventListener('click', () => {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'closeHealthRecords' }, '*');
+                    } else {
+                        router.go('home');
+                    }
+                });
+                
+                // Add buttons
+                document.getElementById('addProviderBtn').addEventListener('click', () => this.addProvider());
+                document.getElementById('addMedicationBtn').addEventListener('click', () => this.addMedication());
+                document.getElementById('addConditionBtn').addEventListener('click', () => this.addCondition());
+                document.getElementById('addSurgeryBtn').addEventListener('click', () => this.addSurgery());
+                document.getElementById('addPastSurgeryBtn').addEventListener('click', () => this.addPastSurgery());
+                document.getElementById('addNoteBtn').addEventListener('click', () => this.addNote());
+                
+                // Modal buttons
+                document.getElementById('modalSubmit').addEventListener('click', () => this.handleModalSubmit());
+                document.getElementById('modalCancel').addEventListener('click', () => this.closeModal());
+                document.getElementById('firstTimeClose').addEventListener('click', () => {
+                    document.getElementById('firstTimeModal').classList.remove('active');
+                    if (!this.sessionPassword) {
+                        this.showPasswordModal('Set Password for Encryption', true, 'unlock');
+                    }
+                });
+                
+                // Password field events
+                document.getElementById('modalPassword').addEventListener('input', (e) => this.checkPasswordStrength(e.target.value));
+                document.getElementById('modalPassword').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.handleModalSubmit();
+                });
+                document.getElementById('modalConfirmPassword').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.handleModalSubmit();
+                });
+                
+                // Track changes on form inputs
+                document.addEventListener('input', (e) => {
+                    if (e.target.classList.contains('form-data')) {
+                        this.markAsChanged();
+                    }
+                });
+                
+                document.addEventListener('change', (e) => {
+                    if (e.target.classList.contains('form-data')) {
+                        this.markAsChanged();
+                    }
+                });
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                        e.preventDefault();
+                        this.saveData().catch(console.error);
+                    }
+                });
+                
+                // Activity tracking
+                document.addEventListener('click', (e) => {
+                    // If locked and clicking on the main content (but not modal), offer to unlock
+                    if (this.isLocked && !window.exportingPDF && e.target.closest('.main-content') && 
+                        !e.target.closest('.modal') && !e.target.closest('.tab') && !e.target.closest('button')) {
+                        this.unlockFile();
+                        return;
+                    }
+                    this.trackActivity();
+                });
+                document.addEventListener('keypress', () => this.trackActivity());
+                document.addEventListener('scroll', () => this.trackActivity());
+                
+                // Warn before leaving with unsaved changes
+                window.addEventListener('beforeunload', (e) => {
+                    if (this.timerInterval) {
+                        clearInterval(this.timerInterval);
+                    }
+                    
+                    if (this.hasUnsavedChanges) {
+                        e.preventDefault();
+                        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                    }
+                });
+            }
+
+            setupSectionToggles() {
+                const saved = JSON.parse(localStorage.getItem('sectionStates') || '{}');
+                document.querySelectorAll('.section').forEach(section => {
+                    const header = section.querySelector('.section-header');
+                    if (!header) return;
+                    header.addEventListener('click', () => {
+                        section.classList.toggle('collapsed');
+                        this.persistSectionStates();
+                    });
+                    if (saved[section.id]) {
+                        section.classList.add('collapsed');
+                    }
+                });
+            }
+
+            persistSectionStates() {
+                const states = {};
+                document.querySelectorAll('.section').forEach(section => {
+                    states[section.id] = section.classList.contains('collapsed');
+                });
+                localStorage.setItem('sectionStates', JSON.stringify(states));
+            }
+
+            navigateToSection(e) {
+                const sectionId = e.target.dataset.section;
+                const section = document.getElementById(`${sectionId}-section`);
+                if (section) {
+                    // Update active tab
+                    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                    e.target.classList.add('active');
+                    
+                    // Smooth scroll
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+            
+            trackActivity() {
+                this.lastActivityTime = Date.now();
+                
+                // Reset lock timeout
+                if (this.lockTimeout) clearTimeout(this.lockTimeout);
+                
+                if (this.sessionPassword && !this.isLocked) {
+                    this.lockTimeout = setTimeout(() => {
+                        if (!this.isLocked) {
+                            this.lockFile();
+                            alert('Session locked due to inactivity');
+                        }
+                    }, 45 * 60 * 1000); // 45 minutes
+                    
+                    // Update timer display
+                    if (!this.timerInterval) {
+                        this.timerInterval = setInterval(() => this.updateLockTimer(), 1000);
+                    }
+                }
+                
+                this.updateLockTimer();
+            }
+            
+            updateLockTimer() {
+                if (!this.sessionPassword || this.isLocked) {
+                    document.getElementById('lockTimer').textContent = '';
+                    return;
+                }
+                
+                const elapsed = Date.now() - this.lastActivityTime;
+                const remaining = (45 * 60 * 1000) - elapsed;
+                
+                if (remaining > 0) {
+                    const minutes = Math.floor(remaining / 60000);
+                    const seconds = Math.floor((remaining % 60000) / 1000);
+                    
+                    if (minutes < 5) {
+                        document.getElementById('lockTimer').textContent = `Auto-lock in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                        document.getElementById('lockTimer').style.color = '#dc2626';
+                    } else {
+                        document.getElementById('lockTimer').textContent = '';
+                    }
+                }
+            }
+            
+            markAsChanged() {
+                this.hasUnsavedChanges = true;
+                this.updateSaveStatus();
+
+                // Auto-save after 15 seconds of inactivity
+                if (this.autoSaveTimeout) clearTimeout(this.autoSaveTimeout);
+                this.autoSaveTimeout = setTimeout(() => {
+                    if (this.sessionPassword && !this.isLocked) {
+                        this.performSave(this.sessionPassword, true);
+                    }
+                }, 15000);
+
+                // Clear existing reminder
+                if (this.saveReminderTimeout) clearTimeout(this.saveReminderTimeout);
+
+                // Set reminder for 5 minutes
+                this.saveReminderTimeout = setTimeout(() => {
+                    if (this.hasUnsavedChanges) {
+                        if (confirm('You have unsaved changes. Would you like to save now?')) {
+                            this.saveData().catch(console.error);
+                        }
+                    }
+                }, 5 * 60 * 1000);
+            }
+            
+            updateSaveStatus() {
+                const statusEl = document.getElementById('saveStatus');
+                const saveBtn = document.getElementById('saveBtn');
+                
+                if (!this.lastSaveTime) {
+                    statusEl.className = 'save-status never-saved';
+                    statusEl.innerHTML = '⚠️ Never Saved - Not Archived';
+                    saveBtn.className = 'btn btn-save';
+                } else if (this.hasUnsavedChanges) {
+                    statusEl.className = 'save-status unsaved';
+                    statusEl.innerHTML = '⚠️ Unsaved Changes - Saving…';
+                    saveBtn.className = 'btn btn-save';
+                } else {
+                    statusEl.className = 'save-status saved';
+                    statusEl.innerHTML = `✓ Saved ${this.formatTime(this.lastSaveTime)}`;
+                    saveBtn.className = 'btn btn-save saved';
+                }
+            }
+            
+            formatTime(date) {
+                const now = new Date();
+                const diff = now - date;
+                
+                if (diff < 60000) return 'just now';
+                if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+                if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+                return date.toLocaleDateString();
+            }
+            
+            // Lock/Unlock functionality
+            toggleLock() {
+                if (this.isLocked) {
+                    this.unlockFile();
+                } else {
+                    this.lockFile();
+                }
+            }
+            
+            lockFile() {
+                this.isLocked = true;
+                this.emergencyUnlocked = false;
+                document.getElementById('lockBtn').innerHTML = '🔒 Unlock';
+                document.getElementById('lockBtn').className = 'btn btn-locked';
+                document.getElementById('emergencyContent').classList.remove('unlocked');
+                document.getElementById('securityText').textContent = '🔒 Session Locked';
+                document.getElementById('lockTimer').textContent = '';
+                
+                // Clear timer interval
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+                
+                // Blur all form fields EXCEPT those in modals
+                document.querySelectorAll('.main-content input, .main-content textarea, .main-content select').forEach(el => {
+                    el.setAttribute('readonly', true);
+                    el.style.filter = 'blur(3px)';
+                    el.style.pointerEvents = 'none';
+                    el.style.userSelect = 'none';
+                });
+                
+                // Disable all buttons except unlock and navigation tabs
+                document.querySelectorAll('button').forEach(btn => {
+                    const isTab = btn.classList.contains('tab');
+                    const isLockBtn = btn.id === 'lockBtn';
+                    const isModalBtn = btn.closest('.modal');
+
+                    if (!isTab && !isLockBtn && !isModalBtn) {
+                        btn.disabled = true;
+                    }
+                });
+            }
+            
+            unlockFile() {
+                if (!this.sessionPassword) {
+                    this.showPasswordModal('Enter Password to Unlock', false, 'unlock');
+                    return;
+                }
+                
+                this.showPasswordModal('Enter Password to Unlock', false, 'unlockSession');
+            }
+            
+            async completeUnlock() {
+                this.isLocked = false;
+                document.getElementById('lockBtn').innerHTML = '🔓 Lock';
+                document.getElementById('lockBtn').className = 'btn btn-lock';
+                document.getElementById('securityText').textContent = 'Always Encrypted at Rest';
+                
+                // Unblur all form fields in main content
+                document.querySelectorAll('.main-content input, .main-content textarea, .main-content select').forEach(el => {
+                    el.removeAttribute('readonly');
+                    el.style.filter = '';
+                    el.style.pointerEvents = '';
+                    el.style.userSelect = '';
+                });
+                
+                // Re-enable all buttons
+                document.querySelectorAll('button').forEach(btn => {
+                    btn.disabled = false;
+                });
+                
+                // Restart activity tracking and timer
+                this.trackActivity();
+                if (!this.timerInterval) {
+                    this.timerInterval = setInterval(() => this.updateLockTimer(), 1000);
+                }
+                if (!this.loaded && this.sessionPassword) {
+                    this.loadArchiveData().catch(console.error);
+                }
+            }
+            
+            changePassword() {
+                if (!this.sessionPassword) {
+                    alert('Please save or load a record first');
+                    return;
+                }
+                
+                this.showPasswordModal('Enter Current Password', false, 'verifyForChange');
+            }
+            
+            // Password modal functionality
+            showPasswordModal(title, showConfirm, callback) {
+                const modal = document.getElementById('passwordModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const confirmField = document.getElementById('confirmPasswordField');
+
+                // Ensure modal appears at the top of the viewport
+                // window.scrollTo(0, 0);
+
+                modalTitle.textContent = title;
+                confirmField.style.display = showConfirm ? 'block' : 'none';
+
+                // Clear fields
+                document.getElementById('modalPassword').value = '';
+                document.getElementById('modalConfirmPassword').value = '';
+                document.getElementById('passwordStrength').style.display = 'none';
+
+                modal.classList.add('active');
+                document.getElementById('modalPassword').focus();
+
+                // Store callback
+                modal.dataset.action = showConfirm ? 'setPassword' : 'decrypt';
+                modal.dataset.callback = callback || '';
+            }
+            
+            closeModal() {
+                const modal = document.getElementById('passwordModal');
+                modal.classList.remove('active');
+                
+                // Clear fields
+                document.getElementById('modalPassword').value = '';
+                document.getElementById('modalConfirmPassword').value = '';
+                document.getElementById('passwordStrength').style.display = 'none';
+                
+                // Clear password strength bars
+                document.querySelectorAll('.strength-bar').forEach(bar => {
+                    bar.className = 'strength-bar';
+                });
+            }
+            
+            checkPasswordStrength(password) {
+                const strengthBars = document.querySelectorAll('.strength-bar');
+                strengthBars.forEach(bar => bar.className = 'strength-bar');
+                
+                if (!password) {
+                    document.getElementById('passwordStrength').style.display = 'none';
+                    return;
+                }
+                
+                document.getElementById('passwordStrength').style.display = 'flex';
+                
+                let strength = 0;
+                if (password.length >= 8) strength++;
+                if (password.length >= 12) strength++;
+                if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+                if (/[0-9]/.test(password) && /[^a-zA-Z0-9]/.test(password)) strength++;
+                
+                const colors = ['weak', 'weak', 'medium', 'medium', 'active'];
+                for (let i = 0; i < strength; i++) {
+                    strengthBars[i].classList.add(colors[strength]);
+                }
+            }
+            
+            async handleModalSubmit() {
+                const modal = document.getElementById('passwordModal');
+                const password = document.getElementById('modalPassword').value;
+                const confirmPassword = document.getElementById('modalConfirmPassword').value;
+                const action = modal.dataset.action;
+                const callback = modal.dataset.callback;
+                
+                if (!password) {
+                    alert('Please enter a password');
+                    return;
+                }
+                
+                if (action === 'setPassword') {
+                    if (password !== confirmPassword) {
+                        alert('Passwords do not match');
+                        return;
+                    }
+                    
+                    if (password.length < 8) {
+                        alert('Password must be at least 8 characters long');
+                        return;
+                    }
+                    
+                    // Store password for session
+                    this.sessionPassword = password;
+                    
+                    // Update UI
+                    document.getElementById('lockBtn').style.display = 'inline-block';
+                    document.getElementById('changePasswordBtn').style.display = 'inline-block';
+                    
+                    // Execute callback with password
+                    if (callback === 'save') {
+                        await this.performSave(password);
+                    } else if (callback === 'changePassword') {
+                        this.sessionPassword = password;
+                        alert('Password changed successfully. Remember to save to archive.');
+                        this.markAsChanged();
+                    } else if (callback === 'unlock') {
+                        this.completeUnlock();
+                    }
+
+                    this.closeModal();
+                    this.trackActivity();
+                } else if (action === 'decrypt') {
+                    // Handle different callbacks
+                    if (callback === 'unlockEmergency') {
+                        if (password === this.sessionPassword) {
+                            this.emergencyUnlocked = true;
+                            document.getElementById('emergencyContent').classList.add('unlocked');
+                            this.closeModal();
+                        } else {
+                            alert('Incorrect password');
+                        }
+                    } else if (callback === 'unlockSession') {
+                        if (password === this.sessionPassword) {
+                            this.completeUnlock();
+                            this.closeModal();
+                        } else {
+                            alert('Incorrect password');
+                        }
+                    } else if (callback === 'verifyForChange') {
+                        if (password === this.sessionPassword) {
+                            this.closeModal();
+                            setTimeout(() => {
+                                this.showPasswordModal('Set New Password', true, 'changePassword');
+                            }, 100);
+                        } else {
+                            alert('Current password is incorrect');
+                        }
+                    } else if (callback === 'unlock') {
+                        // Initial unlock - set session password
+                        this.sessionPassword = password;
+                        document.getElementById('lockBtn').style.display = 'inline-block';
+                        document.getElementById('changePasswordBtn').style.display = 'inline-block';
+                        this.completeUnlock();
+                        this.closeModal();
+                    }
+                }
+            }
+            
+            unlockEmergencyPlans() {
+                if (!this.sessionPassword) {
+                    alert('Please set a password first by saving to the archive');
+                    this.saveData().catch(console.error);
+                    return;
+                }
+                
+                this.showPasswordModal('Enter Password to View Emergency Plans', false, 'unlockEmergency');
+            }
+            
+            // Save/Load functionality
+            async saveData() {
+                if (this.sessionPassword && !this.isLocked) {
+                    await this.performSave(this.sessionPassword);
+                } else if (this.isLocked) {
+                    alert('Please unlock the record first');
+                    this.unlockFile();
+                } else {
+                    this.showPasswordModal('Set Password for Encryption', true, 'save');
+                }
+            }
+            
+            async performSave(password, isAuto = false) {
+                const scrollPosition = window.scrollY;
+
+                const formData = this.collectFormData();
+                const timestamp = new Date().toLocaleString();
+
+                // Record intended update time in payload
+                formData.lastUpdated = timestamp;
+
+                try {
+                    let existing = {};
+                    try {
+                        let existingData = null;
+                        try {
+                            const cacheResp = await fetch(
+                                `${XANO_BASE}/ikey_cache?guid=${encodeURIComponent(this.guid)}`,
+                                { method: 'GET', mode: 'cors', cache: 'no-store' }
+                            );
+                            if (cacheResp.ok) {
+                                existingData = await cacheResp.json();
+                            }
+                        } catch (err) {
+                            console.log('Cache fetch failed:', err.message);
+                        }
+                        if (!existingData) {
+                            const archiveUrl = `${ARCHIVE_BASE}${this.guid}.json?ts=${Date.now()}`;
+                            const existingResp = await fetch(archiveUrl, { mode: 'cors', cache: 'no-store' });
+                            if (existingResp.ok) {
+                                existingData = await existingResp.json();
+                            }
+                        }
+                        if (existingData) {
+                            existing = await this.crypto.decrypt(existingData.data, password);
+                        }
+                    } catch (e) {
+                        console.warn('Could not load existing archive data', e);
+                    }
+                    existing.healthRecords = formData;
+
+                    const encrypted = await this.crypto.encrypt(existing, password);
+                    const archivePayload = {
+                        encrypted: true,
+                        version: '3.0',
+                        data: encrypted
+                    };
+                    let hash = null;
+                    if (password) {
+                        hash = await computeDoubleHash(password, encrypted.data);
+                    }
+
+                    const response = await fetch(WEBHOOK_URL, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            guid: this.guid,
+                            data: archivePayload,
+                            doublehash: hash,
+                            referer: document.referrer
+                        })
+                    });
+                    if (!response.ok) throw new Error('Network response was not ok');
+
+                    // Update last updated display only after successful save
+                    const lastUpdatedEl = document.getElementById('lastUpdated');
+                    if (lastUpdatedEl) lastUpdatedEl.textContent = timestamp;
+
+                    const src = document.getElementById('hr-source');
+                    if (src) src.textContent = 'Source: Server cache';
+
+                    // Update save status
+                    this.hasUnsavedChanges = false;
+                    this.lastSaveTime = new Date();
+                    this.updateSaveStatus();
+                    if (this.saveReminderTimeout) {
+                        clearTimeout(this.saveReminderTimeout);
+                        this.saveReminderTimeout = null;
+                    }
+
+                    // Store session password if not already stored
+                    if (!this.sessionPassword) {
+                        this.sessionPassword = password;
+                        document.getElementById('lockBtn').style.display = 'inline-block';
+                        document.getElementById('changePasswordBtn').style.display = 'inline-block';
+                        this.trackActivity();
+                        if (!this.timerInterval) {
+                            this.timerInterval = setInterval(() => this.updateLockTimer(), 1000);
+                        }
+                    }
+
+                    if (!isAuto) {
+                        alert('Record saved to archive with encryption');
+                        window.scrollTo(0, scrollPosition);
+                    }
+                } catch (error) {
+                    if (!isAuto) {
+                        alert('Error saving to archive: ' + error.message);
+                        window.scrollTo(0, scrollPosition);
+                    } else {
+                        console.error('Auto-save failed', error);
+                    }
+                }
+            }
+            
+            collectFormData() {
+                const formData = {};
+                const inputs = document.querySelectorAll('.form-data:not(.dynamic-provider):not(.dynamic-medication):not(.dynamic-condition):not(.dynamic-surgery):not(.dynamic-past-surgery):not(.dynamic-note)');
+                
+                inputs.forEach(input => {
+                    const field = input.dataset.field;
+                    if (input.type === 'checkbox') {
+                        formData[field] = input.checked;
+                    } else {
+                        formData[field] = input.value;
+                    }
+                });
+                
+                // Collect dynamic data
+                formData.providers = this.collectDynamicData('provider');
+                formData.medications = this.collectDynamicData('medication');
+                formData.conditions = this.collectDynamicData('condition');
+                formData.surgeries = this.collectDynamicData('surgery');
+                formData.pastSurgeries = this.collectDynamicData('past-surgery');
+                formData.notes = this.collectDynamicData('note');
+
+                // Save section collapse state
+                formData.collapsedSections = {};
+                document.querySelectorAll('.section').forEach(section => {
+                    formData.collapsedSections[section.id] = section.classList.contains('collapsed');
+                });
+
+                formData.guid = this.guid;
+
+                return formData;
+            }
+            
+            collectDynamicData(type) {
+                const items = [];
+                const containers = document.querySelectorAll(`[data-${type}-id]`);
+                
+                const toCamel = str => str.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+
+                containers.forEach(container => {
+                    const id = container.dataset[`${toCamel(type)}Id`];
+                    if (!id) return;
+                    
+                    const item = { id };
+                    const inputs = container.querySelectorAll(`.dynamic-${type}`);
+                    
+                    inputs.forEach(input => {
+                        const field = input.dataset.field;
+                        if (input.type === 'checkbox') {
+                            item[field] = input.checked;
+                        } else {
+                            item[field] = input.value;
+                        }
+                    });
+                    
+                    items.push(item);
+                });
+                
+                return items;
+            }
+            
+            loadFormData(data) {
+                const inputs = document.querySelectorAll('.form-data:not(.dynamic-provider):not(.dynamic-medication):not(.dynamic-condition):not(.dynamic-surgery):not(.dynamic-past-surgery):not(.dynamic-note)');
+                
+                inputs.forEach(input => {
+                    const field = input.dataset.field;
+                    if (data.hasOwnProperty(field)) {
+                        if (input.type === 'checkbox') {
+                            input.checked = data[field];
+                        } else {
+                            input.value = data[field];
+                        }
+                    }
+                });
+                
+                // Load dynamic data
+                this.loadDynamicData('providers', data.providers || []);
+                this.loadDynamicData('medications', data.medications || []);
+                this.loadDynamicData('conditions', data.conditions || []);
+                this.loadDynamicData('surgeries', data.surgeries || []);
+                this.loadDynamicData('pastSurgeries', data.pastSurgeries || []);
+                this.loadDynamicData('notes', data.notes || []);
+
+                // Restore section collapse state
+                if (data.collapsedSections) {
+                    Object.entries(data.collapsedSections).forEach(([id, collapsed]) => {
+                        const section = document.getElementById(id);
+                        if (section) {
+                            section.classList.toggle('collapsed', collapsed);
+                        }
+                    });
+                    this.persistSectionStates();
+                }
+            }
+            
+            loadDynamicData(type, items) {
+                // Clear existing
+                const containerMap = {
+                    'providers': 'providers-container',
+                    'medications': 'medications-container',
+                    'conditions': 'conditions-container',
+                    'surgeries': 'surgeries-container',
+                    'pastSurgeries': 'past-surgeries-container',
+                    'notes': 'notes-container'
+                };
+                
+                const container = document.getElementById(containerMap[type]);
+                if (container) container.innerHTML = '';
+                
+                // Reset dynamic data
+                this.dynamicData[type] = [];
+                
+                // Add items
+                items.forEach(itemData => {
+                    if (!itemData || Object.keys(itemData).length === 0) {
+                        return;
+                    }
+                    const addMethod = {
+                        'providers': () => this.addProvider(),
+                        'medications': () => this.addMedication(),
+                        'conditions': () => this.addCondition(),
+                        'surgeries': () => this.addSurgery(),
+                        'pastSurgeries': () => this.addPastSurgery(),
+                        'notes': () => this.addNote()
+                    };
+                    
+                    addMethod[type]();
+                    
+                    // Load data into the newly created fields
+                    const lastAdded = this.dynamicData[type][this.dynamicData[type].length - 1];
+                    if (lastAdded) {
+                        const { id: _unusedId, ...fields } = itemData;
+                        Object.assign(lastAdded, fields);
+                        
+                        // Update form fields
+                    const prefixMap = {
+                        providers: 'provider',
+                        medications: 'med',
+                        conditions: 'condition',
+                        surgeries: 'surgery',
+                        pastSurgeries: 'past-surgery',
+                        notes: 'note'
+                    };
+                    const prefix = prefixMap[type] || type;
+                    const selector = `[data-${prefix}-id="${lastAdded.id}"]`;
+                        const inputs = document.querySelectorAll(`${selector} .form-data`);
+                        
+                        inputs.forEach(input => {
+                            const field = input.dataset.field;
+                            if (itemData.hasOwnProperty(field)) {
+                                if (input.type === 'checkbox') {
+                                    input.checked = itemData[field];
+                                } else {
+                                    input.value = itemData[field];
+                                }
+                            }
+                        });
+                        
+                        // Special handling for providers
+                        if (type === 'providers' && !itemData.active) {
+                            this.toggleProviderActive(lastAdded.id);
+                        }
+                        
+                        // Restore mood selection for notes
+                        if (type === 'notes' && itemData.mood) {
+                            const moodItem = document.querySelector(`[data-note-id="${lastAdded.id}"] .scale-item[data-value="${itemData.mood}"]`);
+                            if (moodItem) moodItem.click();
+                        }
+                    }
+                });
+                
+                // Update provider dropdowns after all providers loaded
+                if (type === 'providers') {
+                    this.updateProviderDropdowns();
+                }
+                
+                // Sort notes after loading
+                if (type === 'notes') {
+                    this.sortNotes();
+                }
+            }
+            
+            // Dynamic item management
+            addProvider() {
+                const container = document.getElementById('providers-container');
+                const index = this.dynamicData.providers.length;
+                const providerId = `provider_${Date.now()}`;
+                
+                this.dynamicData.providers.push({ id: providerId, active: true });
+                
+                const providerHtml = `
+                    <div class="provider-card" data-provider-id="${providerId}">
+                        <button class="delete-btn no-print" data-provider-id="${providerId}">Remove</button>
+                        <div class="provider-header">
+                            <div>
+                                <strong>Provider Name:</strong> <input type="text" class="form-data dynamic-provider" data-provider-id="${providerId}" data-field="name" style="display: inline; width: 200px;" />
+                                <br>
+                                <strong>Specialty:</strong> <input type="text" class="form-data dynamic-provider" data-provider-id="${providerId}" data-field="specialty" style="display: inline; width: 200px;" />
+                            </div>
+                            <select class="form-data dynamic-provider" data-provider-id="${providerId}" data-field="safetyStatus">
+                                <option value="green">✓ Affirming Provider</option>
+                                <option value="yellow">⚠️ Context Dependent</option>
+                                <option value="red">⚠️ Use Legal Name Only</option>
+                            </select>
+                        </div>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="provider${index}-chosen" class="form-data dynamic-provider" data-provider-id="${providerId}" data-field="canUseChosen">
+                                <label for="provider${index}-chosen">Can use chosen name</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="provider${index}-legal" class="form-data dynamic-provider" data-provider-id="${providerId}" data-field="mustUseLegal">
+                                <label for="provider${index}-legal">Must use legal name</label>
+                            </div>
+                        </div>
+                        <div class="grid-3" style="margin-top: 10px;">
+                            <div class="field">
+                                <label>Phone</label>
+                                <input type="tel" class="form-data dynamic-provider" data-provider-id="${providerId}" data-field="phone" />
+                            </div>
+                            <div class="field">
+                                <label>Email</label>
+                                <input type="email" class="form-data dynamic-provider" data-provider-id="${providerId}" data-field="email" />
+                            </div>
+                            <div class="field">
+                                <label>NPI Number</label>
+                                <input type="text" class="form-data dynamic-provider" data-provider-id="${providerId}" data-field="npi" />
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Address</label>
+                            <textarea rows="2" class="form-data dynamic-provider" data-provider-id="${providerId}" data-field="address"></textarea>
+                        </div>
+                        <div class="field">
+                            <label>Notes (including name/pronoun preferences)</label>
+                            <textarea rows="2" class="form-data dynamic-provider" data-provider-id="${providerId}" data-field="notes"></textarea>
+                        </div>
+                        <div class="provider-status">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="provider${index}-active" class="form-data dynamic-provider" data-provider-id="${providerId}" data-field="active" checked>
+                                <label for="provider${index}-active">Active Provider</label>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', providerHtml);
+                
+                // Add event listeners to new elements
+                if (container.lastElementChild) {
+                    container.lastElementChild.querySelector('.delete-btn').addEventListener('click', () => this.removeProvider(providerId));
+                    container.lastElementChild.querySelector('[data-field="name"]').addEventListener('change', () => this.updateProviderDropdowns());
+                    container.lastElementChild.querySelector('[data-field="specialty"]').addEventListener('change', () => this.updateProviderDropdowns());
+                    container.lastElementChild.querySelector('[data-field="safetyStatus"]').addEventListener('change', (e) => this.updateProviderSafety(e.target));
+                    container.lastElementChild.querySelector('[data-field="active"]').addEventListener('change', () => this.toggleProviderActive(providerId));
+                }
+                
+                this.markAsChanged();
+                this.updateProviderDropdowns();
+            }
+            
+            removeProvider(providerId) {
+                if (confirm('Are you sure you want to remove this provider?')) {
+                    const element = document.querySelector(`[data-provider-id="${providerId}"]`);
+                    element.remove();
+                    this.dynamicData.providers = this.dynamicData.providers.filter(p => p.id !== providerId);
+                    this.markAsChanged();
+                    this.updateProviderDropdowns();
+                }
+            }
+            
+            toggleProviderActive(providerId) {
+                const card = document.querySelector(`[data-provider-id="${providerId}"]`);
+                const checkbox = card.querySelector('[data-field="active"]');
+                
+                if (checkbox.checked) {
+                    card.classList.remove('inactive-provider');
+                } else {
+                    card.classList.add('inactive-provider');
+                }
+                
+                this.updateProviderDropdowns();
+            }
+            
+            updateProviderSafety(select) {
+                const providerId = select.dataset.providerId;
+                const value = select.value;
+                
+                // Update visual indicator
+                const card = document.querySelector(`[data-provider-id="${providerId}"]`);
+                const header = card.querySelector('.provider-header');
+                
+                // Remove existing indicator
+                const existingIndicator = header.querySelector('.safety-indicator');
+                if (existingIndicator) existingIndicator.remove();
+                
+                // Add new indicator
+                const indicators = {
+                    green: '<div class="safety-indicator safety-green">✓ Affirming Provider</div>',
+                    yellow: '<div class="safety-indicator safety-yellow">⚠️ Context Dependent</div>',
+                    red: '<div class="safety-indicator safety-red">⚠️ Use Legal Name Only</div>'
+                };
+                
+                header.insertAdjacentHTML('beforeend', indicators[value]);
+            }
+            
+            updateProviderDropdowns() {
+                // Get all active providers
+                const providers = [];
+                document.querySelectorAll('.provider-card').forEach(card => {
+                    const providerId = card.dataset.providerId;
+                    const nameInput = card.querySelector('[data-field="name"]');
+                    const specialtyInput = card.querySelector('[data-field="specialty"]');
+                    const activeCheckbox = card.querySelector('[data-field="active"]');
+                    
+                    if (nameInput.value && activeCheckbox.checked) {
+                        providers.push({
+                            id: providerId,
+                            name: nameInput.value,
+                            specialty: specialtyInput.value || 'General'
+                        });
+                    }
+                });
+                
+                // Update all provider dropdowns in notes
+                document.querySelectorAll('.note-provider-select').forEach(select => {
+                    const currentValue = select.value;
+                    select.innerHTML = '<option value="">Select provider...</option>';
+                    
+                    providers.forEach(provider => {
+                        const option = document.createElement('option');
+                        option.value = provider.name;
+                        option.textContent = `${provider.name} (${provider.specialty})`;
+                        select.appendChild(option);
+                    });
+                    
+                    // Restore previous value if still exists
+                    if (currentValue && Array.from(select.options).some(opt => opt.value === currentValue)) {
+                        select.value = currentValue;
+                    }
+                });
+            }
+            
+            addMedication() {
+                const container = document.getElementById('medications-container');
+                const medId = `med_${Date.now()}`;
+                
+                this.dynamicData.medications.push({ id: medId });
+                
+                const medHtml = `
+                    <div class="list-item" data-med-id="${medId}">
+                        <button class="delete-btn no-print" data-med-id="${medId}">Remove</button>
+                        <div class="grid-3">
+                            <div class="field">
+                                <label>Medication Name</label>
+                                <input type="text" class="form-data dynamic-medication" data-med-id="${medId}" data-field="name" />
+                            </div>
+                            <div class="field">
+                                <label>Dosage</label>
+                                <input type="text" class="form-data dynamic-medication" data-med-id="${medId}" data-field="dosage" />
+                            </div>
+                            <div class="field">
+                                <label>Frequency</label>
+                                <input type="text" class="form-data dynamic-medication" data-med-id="${medId}" data-field="frequency" />
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Prescribed For</label>
+                            <input type="text" class="form-data dynamic-medication" data-med-id="${medId}" data-field="purpose" />
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', medHtml);
+                
+                // Add event listener
+                if (container.lastElementChild) {
+                    container.lastElementChild.querySelector('.delete-btn').addEventListener('click', () => this.removeMedication(medId));
+                }
+                
+                this.markAsChanged();
+            }
+            
+            removeMedication(medId) {
+                if (confirm('Are you sure you want to remove this medication?')) {
+                    const element = document.querySelector(`[data-med-id="${medId}"]`);
+                    element.remove();
+                    this.dynamicData.medications = this.dynamicData.medications.filter(m => m.id !== medId);
+                    this.markAsChanged();
+                }
+            }
+            
+            addCondition() {
+                const container = document.getElementById('conditions-container');
+                const conditionId = `condition_${Date.now()}`;
+                
+                this.dynamicData.conditions.push({ id: conditionId });
+                
+                const conditionHtml = `
+                    <div class="list-item" data-condition-id="${conditionId}">
+                        <button class="delete-btn no-print" data-condition-id="${conditionId}">Remove</button>
+                        <div class="grid-3">
+                            <div class="field">
+                                <label>Condition Name</label>
+                                <input type="text" class="form-data dynamic-condition" data-condition-id="${conditionId}" data-field="name" />
+                            </div>
+                            <div class="field">
+                                <label>Diagnosis Date</label>
+                                <input type="date" class="form-data dynamic-condition" data-condition-id="${conditionId}" data-field="date" />
+                            </div>
+                            <div class="field">
+                                <label>Treating Provider</label>
+                                <input type="text" class="form-data dynamic-condition" data-condition-id="${conditionId}" data-field="provider" />
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Notes</label>
+                            <textarea rows="2" class="form-data dynamic-condition" data-condition-id="${conditionId}" data-field="notes"></textarea>
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', conditionHtml);
+                
+                // Add event listener
+                if (container.lastElementChild) {
+                    container.lastElementChild.querySelector('.delete-btn').addEventListener('click', () => this.removeCondition(conditionId));
+                }
+                
+                this.markAsChanged();
+            }
+            
+            removeCondition(conditionId) {
+                if (confirm('Are you sure you want to remove this condition?')) {
+                    const element = document.querySelector(`[data-condition-id="${conditionId}"]`);
+                    element.remove();
+                    this.dynamicData.conditions = this.dynamicData.conditions.filter(c => c.id !== conditionId);
+                    this.markAsChanged();
+                }
+            }
+            
+            addSurgery() {
+                const container = document.getElementById('surgeries-container');
+                const surgeryId = `surgery_${Date.now()}`;
+                
+                this.dynamicData.surgeries.push({ id: surgeryId });
+                
+                const surgeryHtml = `
+                    <div class="list-item" data-surgery-id="${surgeryId}">
+                        <button class="delete-btn no-print" data-surgery-id="${surgeryId}">Remove</button>
+                        <div class="grid-2">
+                            <div class="field">
+                                <label>Procedure</label>
+                                <input type="text" class="form-data dynamic-surgery" data-surgery-id="${surgeryId}" data-field="procedure" />
+                            </div>
+                            <div class="field">
+                                <label>Date</label>
+                                <input type="date" class="form-data dynamic-surgery" data-surgery-id="${surgeryId}" data-field="date" />
+                            </div>
+                        </div>
+                        <div class="grid-2">
+                            <div class="field">
+                                <label>Surgeon</label>
+                                <input type="text" class="form-data dynamic-surgery" data-surgery-id="${surgeryId}" data-field="surgeon" />
+                            </div>
+                            <div class="field">
+                                <label>Facility</label>
+                                <input type="text" class="form-data dynamic-surgery" data-surgery-id="${surgeryId}" data-field="facility" />
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', surgeryHtml);
+                
+                // Add event listener
+                if (container.lastElementChild) {
+                    container.lastElementChild.querySelector('.delete-btn').addEventListener('click', () => this.removeSurgery(surgeryId));
+                }
+                
+                this.markAsChanged();
+            }
+            
+            removeSurgery(surgeryId) {
+                if (confirm('Are you sure you want to remove this surgery?')) {
+                    const element = document.querySelector(`[data-surgery-id="${surgeryId}"]`);
+                    element.remove();
+                    this.dynamicData.surgeries = this.dynamicData.surgeries.filter(s => s.id !== surgeryId);
+                    this.markAsChanged();
+                }
+            }
+            
+            addPastSurgery() {
+                const container = document.getElementById('past-surgeries-container');
+                const surgeryId = `past_surgery_${Date.now()}`;
+                
+                this.dynamicData.pastSurgeries.push({ id: surgeryId });
+                
+                const surgeryHtml = `
+                    <div class="list-item" data-past-surgery-id="${surgeryId}">
+                        <button class="delete-btn no-print" data-past-surgery-id="${surgeryId}">Remove</button>
+                        <div class="grid-3">
+                            <div class="field">
+                                <label>Procedure Name</label>
+                                <input type="text" class="form-data dynamic-past-surgery" data-past-surgery-id="${surgeryId}" data-field="name" />
+                            </div>
+                            <div class="field">
+                                <label>Surgery Date</label>
+                                <input type="date" class="form-data dynamic-past-surgery" data-past-surgery-id="${surgeryId}" data-field="date" />
+                            </div>
+                            <div class="field">
+                                <label>Hospital/Surgeon</label>
+                                <input type="text" class="form-data dynamic-past-surgery" data-past-surgery-id="${surgeryId}" data-field="hospital" />
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Notes</label>
+                            <textarea rows="2" class="form-data dynamic-past-surgery" data-past-surgery-id="${surgeryId}" data-field="notes"></textarea>
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', surgeryHtml);
+                
+                // Add event listener
+                if (container.lastElementChild) {
+                    container.lastElementChild.querySelector('.delete-btn').addEventListener('click', () => this.removePastSurgery(surgeryId));
+                }
+                
+                this.markAsChanged();
+            }
+            
+            removePastSurgery(surgeryId) {
+                if (confirm('Are you sure you want to remove this surgery?')) {
+                    const element = document.querySelector(`[data-past-surgery-id="${surgeryId}"]`);
+                    element.remove();
+                    this.dynamicData.pastSurgeries = this.dynamicData.pastSurgeries.filter(s => s.id !== surgeryId);
+                    this.markAsChanged();
+                }
+            }
+            
+            addNote() {
+                const container = document.getElementById('notes-container');
+                const noteId = `note_${Date.now()}`;
+                
+                this.dynamicData.notes.push({ id: noteId });
+                
+                const today = new Date().toISOString().split('T')[0];
+                const noteHtml = `
+                    <div class="list-item" data-note-id="${noteId}">
+                        <button class="delete-btn no-print" data-note-id="${noteId}">Remove</button>
+                        <div class="grid-3">
+                            <div class="field">
+                                <label>Date</label>
+                                <input type="date" class="form-data dynamic-note" data-note-id="${noteId}" data-field="date" value="${today}" />
+                            </div>
+                            <div class="field">
+                                <label>Time</label>
+                                <input type="time" class="form-data dynamic-note" data-note-id="${noteId}" data-field="time" />
+                            </div>
+                            <div class="field">
+                                <label>Type</label>
+                                <select class="form-data dynamic-note" data-note-id="${noteId}" data-field="type">
+                                    <option>Personal Note</option>
+                                    <option>Visit Note</option>
+                                    <option>Symptom Tracking</option>
+                                    <option>Treatment Progress</option>
+                                    <option>GAC Note</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-2">
+                            <div class="field">
+                                <label>Provider (if applicable)</label>
+                                <select class="form-data dynamic-note note-provider-select" data-note-id="${noteId}" data-field="provider">
+                                    <option value="">Select provider...</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>Follow-up Needed</label>
+                                <div class="checkbox-item" style="margin-top: 8px;">
+                                    <input type="checkbox" id="note-followup-${noteId}" class="form-data dynamic-note" data-note-id="${noteId}" data-field="followupNeeded">
+                                    <label for="note-followup-${noteId}">Yes, follow-up required</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Note Title</label>
+                            <input type="text" class="form-data dynamic-note" data-note-id="${noteId}" data-field="title" />
+                        </div>
+                        <div class="field">
+                            <label>Note Content</label>
+                            <textarea rows="4" class="form-data dynamic-note" data-note-id="${noteId}" data-field="content"></textarea>
+                        </div>
+                        <div class="field">
+                            <label>Mood (1-10)</label>
+                            <div class="scale-group">
+                                ${[1,2,3,4,5,6,7,8,9,10].map(n => 
+                                    `<div class="scale-item" data-value="${n}" data-note-id="${noteId}">${n}</div>`
+                                ).join('')}
+                            </div>
+                            <input type="hidden" class="form-data dynamic-note" data-note-id="${noteId}" data-field="mood" />
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', noteHtml);
+                
+                // Add event listeners
+                if (container.lastElementChild) {
+                    container.lastElementChild.querySelector('.delete-btn').addEventListener('click', () => this.removeNote(noteId));
+                    container.lastElementChild.querySelectorAll('.scale-item').forEach(item => {
+                        item.addEventListener('click', (e) => this.selectMood(e.target, noteId));
+                    });
+                }
+                
+                this.markAsChanged();
+                this.updateProviderDropdowns();
+                
+                // Sort notes by date (newest first)
+                this.sortNotes();
+            }
+            
+            removeNote(noteId) {
+                if (confirm('Are you sure you want to remove this note?')) {
+                    const element = document.querySelector(`[data-note-id="${noteId}"]`);
+                    element.remove();
+                    this.dynamicData.notes = this.dynamicData.notes.filter(n => n.id !== noteId);
+                    this.markAsChanged();
+                }
+            }
+            
+            selectMood(element, noteId) {
+                // Clear previous selection
+                element.parentElement.querySelectorAll('.scale-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                
+                // Set new selection
+                element.classList.add('selected');
+                
+                // Update hidden input
+                const hiddenInput = element.parentElement.nextElementSibling;
+                if (hiddenInput && hiddenInput.classList.contains('form-data')) {
+                    hiddenInput.value = element.dataset.value;
+                    
+                    // Update note data
+                    const note = this.dynamicData.notes.find(n => n.id === noteId);
+                    if (note) {
+                        note.mood = element.dataset.value;
+                    }
+                    
+                    this.markAsChanged();
+                }
+            }
+            
+            sortNotes() {
+                const container = document.getElementById('notes-container');
+                const notes = Array.from(container.children);
+                
+                notes.sort((a, b) => {
+                    const dateA = a.querySelector('[data-field="date"]').value;
+                    const dateB = b.querySelector('[data-field="date"]').value;
+                    const timeA = a.querySelector('[data-field="time"]').value || '00:00';
+                    const timeB = b.querySelector('[data-field="time"]').value || '00:00';
+                    
+                    const datetimeA = new Date(dateA + 'T' + timeA);
+                    const datetimeB = new Date(dateB + 'T' + timeB);
+                    
+                    return datetimeB - datetimeA; // Newest first
+                });
+                
+                notes.forEach(note => container.appendChild(note));
+            }
+            
+            // PDF Export
+            exportPDF() {
+                const formData = this.collectFormData();
+                const hasData = this.hasUnsavedChanges || this.lastSaveTime || 
+                               Object.keys(formData).some(key => {
+                                   const value = formData[key];
+                                   return value && value !== '' && value !== false && 
+                                          (!Array.isArray(value) || value.length > 0);
+                               });
+                
+                if (!hasData) {
+                    if (!confirm('No data has been entered. Export blank form as PDF?')) {
+                        return;
+                    }
+                }
+                
+                // Generate PDF content
+                const pdfHTML = this.generatePDFContent(formData);
+                
+                // Create a new window for printing
+                const printWindow = window.open('', '_blank');
+                const date = new Date().toISOString().split('T')[0];
+                const patientName = formData.chosenName || formData.legalName || 'Patient';
+                
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>${patientName}_Health_Record_${date}</title>
+    <link rel="icon" href="https://storage.googleapis.com/art_homelessness/favicon.ico">
+                        <style>
+                            ${this.getPDFStyles()}
+                        </style>
+                    </head>
+                    <body>
+                        ${pdfHTML}
+                    </body>
+                    </html>
+                `);
+                
+                printWindow.document.close();
+                
+                // Trigger print after content loads
+                printWindow.onload = function() {
+                    printWindow.print();
+                    printWindow.onafterprint = function() {
+                        printWindow.close();
+                    };
+                };
+            }
+            
+            getPDFStyles() {
+                return `
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body {
+                        font-family: Arial, sans-serif;
+                        font-size: 0.9167rem;
+                        line-height: 1.4;
+                        color: #000;
+                        padding: 0.5in;
+                    }
+                    .pdf-header {
+                        text-align: center;
+                        margin-bottom: 20px;
+                        padding-bottom: 10px;
+                        border-bottom: 2px solid #000;
+                    }
+                    .pdf-header h1 {
+                        font-size: 1.5rem;
+                        margin-bottom: 5px;
+                    }
+                    .pdf-header p {
+                        font-size: 0.8333rem;
+                        color: #555;
+                    }
+                    .pdf-section {
+                        margin-bottom: 20px;
+                        page-break-inside: avoid;
+                    }
+                    .pdf-section-title {
+                        font-size: 1.1667rem;
+                        font-weight: bold;
+                        background: #f0f0f0;
+                        padding: 5px 10px;
+                        margin-bottom: 10px;
+                        border-left: 3px solid #333;
+                    }
+                    .pdf-field {
+                        margin-bottom: 8px;
+                    }
+                    .pdf-field-label {
+                        font-weight: bold;
+                        display: inline-block;
+                        min-width: 150px;
+                    }
+                    .pdf-field-value {
+                        display: inline-block;
+                    }
+                    .pdf-field-value.empty {
+                        color: #999;
+                        font-style: italic;
+                    }
+                    .pdf-grid {
+                        display: table;
+                        width: 100%;
+                        margin-bottom: 10px;
+                    }
+                    .pdf-grid-row {
+                        display: table-row;
+                    }
+                    .pdf-grid-cell {
+                        display: table-cell;
+                        padding: 4px 10px 4px 0;
+                        vertical-align: top;
+                        width: 50%;
+                    }
+                    .pdf-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 10px;
+                        font-size: 0.8333rem;
+                    }
+                    .pdf-table th {
+                        background: #f0f0f0;
+                        padding: 5px;
+                        text-align: left;
+                        border: 1px solid #ccc;
+                        font-weight: bold;
+                    }
+                    .pdf-table td {
+                        padding: 5px;
+                        border: 1px solid #ccc;
+                    }
+                    .pdf-note {
+                        background: #f9f9f9;
+                        padding: 8px;
+                        margin-bottom: 8px;
+                        border-left: 3px solid #666;
+                    }
+                    .pdf-note-header {
+                        font-weight: bold;
+                        margin-bottom: 4px;
+                    }
+                    .pdf-subsection {
+                        margin-top: 10px;
+                        margin-bottom: 10px;
+                    }
+                    .pdf-subsection-title {
+                        font-weight: bold;
+                        font-size: 1rem;
+                        margin-bottom: 5px;
+                        text-decoration: underline;
+                    }
+                    .pdf-list {
+                        margin-left: 20px;
+                        margin-bottom: 10px;
+                    }
+                    .pdf-list li {
+                        margin-bottom: 3px;
+                    }
+                    .pdf-alert {
+                        background: #ffe6e6;
+                        border: 1px solid #ff0000;
+                        padding: 8px;
+                        margin: 10px 0;
+                        font-weight: bold;
+                    }
+                    @media print {
+                        body { padding: 0.5in; }
+                        .pdf-section { page-break-inside: avoid; }
+                        .pdf-table { page-break-inside: avoid; }
+                        .pdf-header { page-break-after: avoid; }
+                        .pdf-section-title { page-break-after: avoid; }
+                    }
+                    .no-data {
+                        color: #999;
+                        font-style: italic;
+                    }
+                `;
+            }
+            
+            generatePDFContent(data) {
+                const formatDate = (dateStr) => {
+                    if (!dateStr) return '';
+                    const date = new Date(dateStr);
+                    return date.toLocaleDateString();
+                };
+                
+                const formatField = (label, value) => {
+                    if (!value || value === '') {
+                        return `<div class="pdf-field"><span class="pdf-field-label">${label}:</span> <span class="pdf-field-value empty">Not provided</span></div>`;
+                    }
+                    return `<div class="pdf-field"><span class="pdf-field-label">${label}:</span> <span class="pdf-field-value">${value}</span></div>`;
+                };
+                
+                let html = `
+                    <div class="pdf-header">
+                        <h1>Personal Health Record</h1>
+                        <p>Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+                        <p>Last Updated: ${data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : 'Never'}</p>
+                    </div>
+                `;
+                
+                // Identity & Safety Section
+                if (data.chosenName || data.legalName) {
+                    html += `<div class="pdf-section">
+                        <div class="pdf-section-title">Identity & Safety Information</div>`;
+                    
+                    if (data.chosenName || data.pronouns) {
+                        html += `<div class="pdf-alert">
+                            Daily Use: ${data.chosenName || 'Not specified'} (${data.pronouns || 'pronouns not specified'})
+                        </div>`;
+                    }
+                    
+                    if (data.differentContexts && data.legalName) {
+                        html += `<div class="pdf-grid">
+                            <div class="pdf-grid-row">
+                                <div class="pdf-grid-cell">${formatField('Legal Name', data.legalName)}</div>
+                                <div class="pdf-grid-cell">${formatField('Legal Pronouns', data.legalPronouns)}</div>
+                            </div>
+                        </div>`;
+                        
+                        const legalContexts = [];
+                        if (data.useForInsurance) legalContexts.push('Insurance');
+                        if (data.useForPrescriptions) legalContexts.push('Prescriptions');
+                        if (data.useForLegalDocs) legalContexts.push('Legal Documents');
+                        if (data.useForLabOrders) legalContexts.push('Lab Orders');
+                        
+                        if (legalContexts.length > 0) {
+                            html += `<div class="pdf-field"><span class="pdf-field-label">Use Legal Name For:</span> ${legalContexts.join(', ')}</div>`;
+                        }
+                    }
+                    
+                    html += `</div>`;
+                }
+                
+                // Personal Information Section
+                html += `<div class="pdf-section">
+                    <div class="pdf-section-title">Personal Information</div>
+                    <div class="pdf-grid">
+                        <div class="pdf-grid-row">
+                            <div class="pdf-grid-cell">${formatField('Date of Birth', formatDate(data.dateOfBirth))}</div>
+                            <div class="pdf-grid-cell">${formatField('Phone', data.phone)}</div>
+                        </div>
+                        <div class="pdf-grid-row">
+                            <div class="pdf-grid-cell">${formatField('Email', data.email)}</div>
+                            <div class="pdf-grid-cell">${formatField('Gender Identity', data.genderIdentity)}</div>
+                        </div>
+                        <div class="pdf-grid-row">
+                            <div class="pdf-grid-cell">${formatField('Sex Assigned at Birth', data.sexAssignedAtBirth)}</div>
+                        </div>
+                    </div>
+                    ${data.address ? formatField('Address', data.address.replace(/\n/g, ', ')) : ''}
+                </div>`;
+                
+                // Healthcare Providers
+                const activeProviders = (data.providers || []).filter(p => p.active !== false && p.name);
+                if (activeProviders.length > 0) {
+                    html += `<div class="pdf-section">
+                        <div class="pdf-section-title">Healthcare Providers</div>
+                        <table class="pdf-table">
+                            <thead>
+                                <tr>
+                                    <th>Provider</th>
+                                    <th>Specialty</th>
+                                    <th>Phone</th>
+                                    <th>Name Usage</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                    
+                    activeProviders.forEach(provider => {
+                        const nameUsage = provider.safetyStatus === 'red' ? 'Legal Name Only' : 
+                                         provider.safetyStatus === 'yellow' ? 'Context Dependent' : 
+                                         'Chosen Name OK';
+                        html += `<tr>
+                            <td>${provider.name}</td>
+                            <td>${provider.specialty || ''}</td>
+                            <td>${provider.phone || ''}</td>
+                            <td>${nameUsage}</td>
+                        </tr>`;
+                    });
+                    
+                    html += `</tbody></table></div>`;
+                }
+                
+                // Insurance Information
+                if (data.insuranceCompany || data.memberId) {
+                    html += `<div class="pdf-section">
+                        <div class="pdf-section-title">Insurance Information</div>
+                        <div class="pdf-grid">
+                            <div class="pdf-grid-row">
+                                <div class="pdf-grid-cell">${formatField('Insurance Company', data.insuranceCompany)}</div>
+                                <div class="pdf-grid-cell">${formatField('Member ID', data.memberId)}</div>
+                            </div>
+                            <div class="pdf-grid-row">
+                                <div class="pdf-grid-cell">${formatField('Group Number', data.groupNumber)}</div>
+                                <div class="pdf-grid-cell">${formatField('Plan Type', data.planType)}</div>
+                            </div>
+                            <div class="pdf-grid-row">
+                                <div class="pdf-grid-cell">${formatField('Policy Holder', data.policyHolderName)}</div>
+                                <div class="pdf-grid-cell">${formatField('Phone', data.insurancePhone)}</div>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+                
+                // Medications
+                const activeMeds = (data.medications || []).filter(m => m.name);
+                if (activeMeds.length > 0) {
+                    html += `<div class="pdf-section">
+                        <div class="pdf-section-title">Current Medications</div>
+                        <table class="pdf-table">
+                            <thead>
+                                <tr>
+                                    <th>Medication</th>
+                                    <th>Dosage</th>
+                                    <th>Frequency</th>
+                                    <th>Purpose</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                    
+                    activeMeds.forEach(med => {
+                        html += `<tr>
+                            <td>${med.name}</td>
+                            <td>${med.dosage || ''}</td>
+                            <td>${med.frequency || ''}</td>
+                            <td>${med.purpose || ''}</td>
+                        </tr>`;
+                    });
+                    
+                    html += `</tbody></table></div>`;
+                }
+                
+                // Allergies
+                if (data.medicationAllergies || data.otherAllergies) {
+                    html += `<div class="pdf-section">
+                        <div class="pdf-section-title">Allergies</div>`;
+                    if (data.medicationAllergies) {
+                        html += `<div class="pdf-field"><span class="pdf-field-label">Medication Allergies:</span><br>${data.medicationAllergies.replace(/\n/g, '<br>')}</div>`;
+                    }
+                    if (data.otherAllergies) {
+                        html += `<div class="pdf-field"><span class="pdf-field-label">Other Allergies:</span><br>${data.otherAllergies.replace(/\n/g, '<br>')}</div>`;
+                    }
+                    html += `</div>`;
+                }
+                
+                // Medical History
+                const activeConditions = (data.conditions || []).filter(c => c.name);
+                if (activeConditions.length > 0 || data.familyHistory) {
+                    html += `<div class="pdf-section">
+                        <div class="pdf-section-title">Medical History</div>`;
+                    
+                    if (activeConditions.length > 0) {
+                        html += `<div class="pdf-subsection-title">Current Conditions</div>`;
+                        activeConditions.forEach(condition => {
+                            html += `<div class="pdf-field">• <strong>${condition.name}</strong> ${condition.date ? `(${formatDate(condition.date)})` : ''} ${condition.provider ? `- ${condition.provider}` : ''}</div>`;
+                        });
+                    }
+                    
+                    if (data.familyHistory) {
+                        html += `<div class="pdf-field" style="margin-top: 10px;"><span class="pdf-field-label">Family History:</span><br>${data.familyHistory.replace(/\n/g, '<br>')}</div>`;
+                    }
+                    
+                    html += `</div>`;
+                }
+                
+                // Gender Affirming Care
+                const activeSurgeries = (data.surgeries || []).filter(s => s.procedure);
+                if (data.hrtStatus || activeSurgeries.length > 0) {
+                    html += `<div class="pdf-section">
+                        <div class="pdf-section-title">Gender Affirming Care</div>`;
+                    
+                    if (data.hrtStatus) {
+                        html += `<div class="pdf-grid">
+                            <div class="pdf-grid-row">
+                                <div class="pdf-grid-cell">${formatField('HRT Status', data.hrtStatus)}</div>
+                                <div class="pdf-grid-cell">${formatField('Start Date', formatDate(data.hrtStartDate))}</div>
+                            </div>
+                        </div>`;
+                        
+                        if (data.hormoneRegimen) {
+                            html += `<div class="pdf-field"><span class="pdf-field-label">Current Regimen:</span><br>${data.hormoneRegimen.replace(/\n/g, '<br>')}</div>`;
+                        }
+                    }
+                    
+                    if (activeSurgeries.length > 0) {
+                        html += `<div class="pdf-subsection-title">Gender-Affirming Surgeries</div>`;
+                        activeSurgeries.forEach(surgery => {
+                            html += `<div class="pdf-field">• <strong>${surgery.procedure}</strong> ${surgery.date ? `(${formatDate(surgery.date)})` : ''} ${surgery.surgeon ? `- Dr. ${surgery.surgeon}` : ''}</div>`;
+                        });
+                    }
+                    
+                    html += `</div>`;
+                }
+                
+                // Recent Notes (last 5)
+                const activeNotes = (data.notes || []).filter(n => n.content || n.title);
+                if (activeNotes.length > 0) {
+                    const recentNotes = activeNotes
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))
+                        .slice(0, 5);
+                    
+                    if (recentNotes.length > 0) {
+                        html += `<div class="pdf-section">
+                            <div class="pdf-section-title">Recent Case Notes</div>`;
+                        
+                        recentNotes.forEach(note => {
+                            html += `<div class="pdf-note">
+                                <div class="pdf-note-header">${formatDate(note.date)} ${note.time || ''} - ${note.type || 'Note'} ${note.title ? `- ${note.title}` : ''}</div>
+                                ${note.content ? `<div>${note.content.replace(/\n/g, '<br>')}</div>` : ''}
+                            </div>`;
+                        });
+                        
+                        html += `</div>`;
+                    }
+                }
+                
+                return html;
+            }
+            
+            // Crypto utilities
+            crypto = {
+                async deriveKey(password, salt) {
+                    const encoder = new TextEncoder();
+                    const keyMaterial = await window.crypto.subtle.importKey(
+                        'raw',
+                        encoder.encode(password),
+                        'PBKDF2',
+                        false,
+                        ['deriveBits', 'deriveKey']
+                    );
+                    
+                    return await window.crypto.subtle.deriveKey(
+                        {
+                            name: 'PBKDF2',
+                            salt: salt,
+                            iterations: 100000,
+                            hash: 'SHA-256'
+                        },
+                        keyMaterial,
+                        { name: 'AES-GCM', length: 256 },
+                        true,
+                        ['encrypt', 'decrypt']
+                    );
+                },
+                
+                async encrypt(data, password) {
+                    const encoder = new TextEncoder();
+                    const salt = window.crypto.getRandomValues(new Uint8Array(16));
+                    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+                    const key = await this.deriveKey(password, salt);
+
+                    const encrypted = await window.crypto.subtle.encrypt(
+                        { name: 'AES-GCM', iv: iv },
+                        key,
+                        encoder.encode(JSON.stringify(data))
+                    );
+
+                    return {
+                        salt: btoa(String.fromCharCode(...salt)),
+                        iv: btoa(String.fromCharCode(...iv)),
+                        data: btoa(String.fromCharCode(...new Uint8Array(encrypted)))
+                    };
+                },
+
+                async decrypt(encryptedData, password) {
+                    const parseB64 = (value) =>
+                        typeof value === 'string'
+                            ? Uint8Array.from(atob(value), c => c.charCodeAt(0))
+                            : new Uint8Array(value);
+                    const salt = parseB64(encryptedData.salt);
+                    const iv = parseB64(encryptedData.iv);
+                    const data = parseB64(encryptedData.data);
+                    const key = await this.deriveKey(password, salt);
+                    
+                    try {
+                        const decrypted = await window.crypto.subtle.decrypt(
+                            { name: 'AES-GCM', iv: iv },
+                            key,
+                            data
+                        );
+                        
+                        const decoder = new TextDecoder();
+                        return JSON.parse(decoder.decode(decrypted));
+                    } catch (e) {
+                        throw new Error('Invalid password or corrupted data');
+                    }
+                }
+            };
+        }
+
+        async function sha256Hash(text) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(text);
+            const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function computeDoubleHash(password, encrypted) {
+            const first = await sha256Hash(password + encrypted);
+            return await sha256Hash(first);
+        }
+
+        // Adjust layout based on the dynamic heights of the bars
+        function updateOffsets() {
+            const securityBar = document.querySelector('.security-bar');
+            const navTabs = document.getElementById('navTabs');
+            const securityHeight = securityBar ? securityBar.offsetHeight : 0;
+            const navHeight = navTabs ? navTabs.offsetHeight : 0;
+            document.documentElement.style.setProperty('--top-bar-height', securityHeight + 'px');
+            document.documentElement.style.setProperty('--nav-tabs-height', navHeight + 'px');
+        }
+
+        window.addEventListener('load', updateOffsets);
+        window.addEventListener('resize', updateOffsets);
+
+        // Initialize the application
+        const app = new HealthVaultApp();
+    </script>
+</body>
+</html>
