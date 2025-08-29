@@ -114,45 +114,10 @@ class ThreeLayerEncryption {
         vault: {
           iv: vaultEnc.iv,
           data: vaultEnc.data,
-    const profileSalt = self.crypto.getRandomValues(new Uint8Array(16));
-    const vaultSalt = self.crypto.getRandomValues(new Uint8Array(16));
-
-    const profileIterations = 100000;
-    const vaultIterations = 200000;
-
-    const profileKey = await this.deriveKey(qrKey + password, profileSalt, profileIterations);
-    const vaultKey = await this.deriveKey(password, vaultSalt, vaultIterations);
-
-    const payloads = {
-      profile: await this.encryptObject(privateInfo, profileKey),
-      ehr: await this.encryptObject(healthRecords, vaultKey)
-    };
-
-    const metadata = {
-      kdf: {
-        profile: {
-          iterations: profileIterations,
-          salt: this.arrayBufferToBase64(profileSalt.buffer)
-        },
-        ehr: {
-          iterations: vaultIterations,
           salt: this.arrayBufferToBase64(vaultSalt.buffer)
         }
       }
     };
-
-    const blob = {
-      version: 1,
-      publicInfo: emergencyInfo,
-      hints: {},
-      verifiers: {},
-      payloads,
-      metadata
-    };
-
-    const Kqr = await this.encryptObject(blob, qrKey);
-
-    return { guid, qrKey, storedData: { Kqr } };
   }
 
   static async unlockPublic(storedData, qrKey) {
@@ -172,25 +137,6 @@ class ThreeLayerEncryption {
     const vaultSalt = new Uint8Array(this.base64ToArrayBuffer(storedData.vault.salt));
     const vaultKey = await this.deriveKey(qrKey, vaultSalt, 100000);
     return await this.decrypt({ iv: storedData.vault.iv, data: storedData.vault.data }, vaultKey);
-    const blob = await this.decryptObject(storedData.Kqr, qrKey);
-    return blob.publicInfo;
-  }
-
-  // Unlock both private info and EHR using a single password
-  static async unlockPrivate(storedData, qrKey, password) {
-    const blob = await this.decryptObject(storedData.Kqr, qrKey);
-    const profileSalt = new Uint8Array(this.base64ToArrayBuffer(blob.metadata.kdf.profile.salt));
-    const profileKey = await this.deriveKey(qrKey + password, profileSalt, blob.metadata.kdf.profile.iterations);
-    const privateInfo = await this.decryptObject(blob.payloads.profile, profileKey);
-    return { privateInfo, ehr: blob.payloads.ehr, metadata: blob.metadata };
-  }
-
-  // Fully unlock the health vault using the same password
-  static async unlockVault(storedData, qrKey, password) {
-    const blob = await this.decryptObject(storedData.Kqr, qrKey);
-    const vaultSalt = new Uint8Array(this.base64ToArrayBuffer(blob.metadata.kdf.ehr.salt));
-    const vaultKey = await this.deriveKey(password, vaultSalt, blob.metadata.kdf.ehr.iterations);
-    return await this.decryptObject(blob.payloads.ehr, vaultKey);
   }
 }
 
