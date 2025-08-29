@@ -1,0 +1,4990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>iKey - Your data. Your key.</title>
+    <meta name="description" content="Secure personal information with zero-knowledge encryption. Only your QR code can unlock your data.">
+
+    <style>
+        /* Softr embedding fixes */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: 
+#4F46E5;
+            --danger: 
+#EF4444;
+            --success: 
+#10B981;
+            --warning: 
+#F59E0B;
+            --surface: 
+#FFFFFF;
+            --surface-alt: 
+#F9FAFB;
+            --text: 
+#111827;
+            --text-secondary: 
+#6B7280;
+        }
+
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow-x: hidden !important;
+            width: 100% !important;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--surface-alt);
+            min-height: 100vh !important;
+            display: flex !important;
+            flex-direction: column;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            padding-top: 80px !important;
+        }
+
+        #healthRecordsTab,
+        #clientCreatorTab,
+        #qrTab,
+        #text911Tab {
+            width: 100%;
+        }
+
+        .container {
+            width: 100% !important;
+            max-width: none;
+            margin: 0 !important;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow: visible;
+            animation: slideIn 0.3s ease;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                max-width: 100%;
+                border-radius: 0 !important;
+                margin: 0 !important;
+                padding-bottom: 80px;
+            }
+
+            body {
+                background: white !important;
+                align-items: flex-start !important;
+            }
+
+            .top-bar {
+                display: flex;
+                justify-content: space-between;
+                grid-template-columns: none;
+                flex-wrap: wrap;
+                height: auto;
+                padding: 4px 10px;
+            }
+            .logo-text-full {
+                display: none;
+            }
+
+            .logo-text-short {
+                display: inline;
+            }
+
+            .controls {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .dashboard-btn,
+            .health-records-btn {
+                display: none !important;
+            }
+
+            .dashboard-header {
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .progress-ring,
+            .progress-ring svg {
+                width: 60px;
+                height: 60px;
+            }
+
+            .section-cards {
+                display: grid;
+                grid-template-columns: 1fr;
+            }
+
+            .section-card {
+                margin: 8px;
+                padding: 12px;
+                position: relative;
+            }
+
+            .action-buttons {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                border-top: 1px solid 
+#e5e7eb;
+                padding: 12px;
+                display: flex;
+                gap: 8px;
+                z-index: 100;
+            }
+
+            .action-buttons .btn {
+                flex: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        /* Info Display Mode */
+        .info-card {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .info-header {
+            background: 
+#ff4757;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .info-header h2 {
+            font-size: 1.125rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .info-section {
+            background: 
+#f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-icon {
+            font-size: 1.25rem;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: 
+#2c3e50;
+            font-weight: 500;
+        }
+
+        .phone-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+            padding: 8px 12px;
+            background: 
+#e8f0fe;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .phone-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .private-section {
+            background: 
+#fff3cd;
+            border: 2px solid 
+#ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .private-section h3 {
+            color: 
+#856404;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid 
+#ffc107;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            margin-bottom: 10px;
+        }
+
+        .hint {
+            font-size: 0.75rem;
+            color: 
+#856404;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        /* Creation Form Mode */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: 
+#2c3e50;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid 
+#e0e0e0;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: 
+#667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            color: 
+#2c3e50;
+            margin: 25px 0 15px;
+            padding-top: 20px;
+            border-top: 2px solid 
+#e0e0e0;
+            font-weight: 600;
+        }
+
+        .section-title:first-of-type {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .section-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+
+        .section-status.complete {
+            background: 
+#d1fae5;
+            color: 
+#065f46;
+        }
+
+        .section-status.incomplete {
+            background: 
+#fee2e2;
+            color: 
+#991b1b;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: 
+#6c757d;
+            margin-top: 10px;
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            margin-top: 10px;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* QR Display */
+        .qr-display {
+            text-align: center;
+            padding: 20px;
+            background: 
+#f8f9fa;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        #qrcode {
+            display: inline-block;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* Help Section */
+        .help-link {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid 
+#e0e0e0;
+        }
+
+        .help-link a {
+            color: 
+#667eea;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .help-content {
+            background: 
+#f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .help-content.active {
+            display: block;
+        }
+
+        /* Loading State */
+        .loading-screen {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(102, 126, 234, 0.3);
+            border-top: 4px solid 
+#667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .upload-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .security-container {
+            max-width: 500px;
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+
+        .archive-logo {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 30px;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .security-progress {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-bottom: 40px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, 
+#667eea, 
+#764ba2);
+            border-radius: 2px;
+        }
+
+        .security-step {
+            transition: opacity 0.3s ease;
+        }
+
+        .step-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        #step-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        #step-message {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .step-indicators {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: white;
+            transform: scale(1.5);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Dev Tools */
+        .dev-trigger {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .dev-trigger:hover {
+            opacity: 1;
+        }
+
+        .dev-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: 
+#2c3e50;
+            color: white;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .dev-panel.active {
+            transform: translateY(0);
+        }
+
+        .dev-panel h3 {
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .dev-panel input,
+        .dev-panel textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .dev-panel button {
+            padding: 8px 15px;
+            background: 
+#667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .dev-output {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Mobile Responsive /
+        @media (max-width: 480px) {
+            body {
+                / Maintain space for fixed top menu */
+                padding: 80px 10px 10px;
+            }
+
+            .container {
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.25rem;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.875rem;
+        }
+
+        .status-success {
+            background: 
+#d4edda;
+            color: 
+#155724;
+            border: 1px solid 
+#c3e6cb;
+        }
+
+        .status-error {
+            background: 
+#f8d7da;
+            color: 
+#721c24;
+            border: 1px solid 
+#f5c6cb;
+        }
+
+        .status-info {
+            background: 
+#fff3cd;
+            color: 
+#856404;
+            border: 2px solid 
+#ffc107;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        .upload-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            overflow: hidden;
+        }
+
+        .upload-header {
+            background: linear-gradient(135deg, 
+#667eea 0%, 
+#764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .upload-content {
+            padding: 30px;
+            min-height: 300px;
+        }
+
+        .data-preview, .key-generation, .encryption-visual,
+        .security-layers, .archive-upload, .success-summary {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .data-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: 
+#f8f9fa;
+            border-radius: 5px;
+        }
+
+        .data-item.locked {
+            background: 
+#fff3cd;
+            border: 1px solid 
+#ffc107;
+        }
+
+        .key-display {
+            background: 
+#2c3e50;
+            color: 
+#00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+        }
+
+        .huge-number {
+            font-size: 0.75rem;
+            color: #666;
+            word-break: break-all;
+        }
+
+        .comparison {
+            color: 
+#667eea;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .data-transform {
+            background: 
+#f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .before, .after {
+            margin: 10px 0;
+        }
+
+        .arrow {
+            text-align: center;
+            color: 
+#667eea;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .layer {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            background: 
+#f0f8ff;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .summary-item {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: 
+#f8f9fa;
+            border-radius: 8px;
+            font-size: 0.75rem;
+        }
+
+        .final-reminder {
+            background: 
+#fff3cd;
+            border: 2px solid 
+#ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .feature-note {
+            color: 
+#856404;
+            font-style: italic;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: 
+#e9ecef;
+            margin: 0 30px 20px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0;
+            background: 
+#667eea;
+            transition: width 0.5s ease;
+        }
+
+        /* Top navigation */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: center;
+            padding: 4px 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-self: start;
+        }
+
+        .logo {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+         .logo-text-short {
+             display: none;
+         }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-self: end;
+        }
+
+        .size-controls {
+            display: flex;
+            gap: 4px;
+        }
+
+        .lang-select {
+            position: relative;
+        }
+
+        .lang-button {
+            background: white;
+            border: 1px solid 
+#e0e0e0;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            direction: ltr;
+        }
+
+        .size-toggle {
+            background: white;
+            border: 1px solid 
+#e0e0e0;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .lang-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: white;
+            border: 1px solid 
+#e0e0e0;
+            border-radius: 8px;
+            margin-top: 4px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+            min-width: 160px;
+            z-index: 1000;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .lang-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .lang-option:hover,
+        .lang-option.active {
+            background: 
+#f0f0f0;
+        }
+
+        .login-btn,
+        .app-btn {
+            background: none;
+            border: none;
+            color:
+#667eea;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .dashboard-btn, .logout-btn {
+            background: none;
+            border: none;
+            color: 
+#667eea;
+            cursor: pointer;
+            font-size: 14px;
+            display: none;
+        }
+
+        .health-records-btn {
+            background: none;
+            border: none;
+            color: 
+#667eea;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+          body.rtl {
+              direction: rtl;
+              text-align: right;
+        }
+
+        body.rtl .logo {
+            justify-self: end;
+        }
+        body.rtl .controls {
+            justify-self: start;
+        }
+
+          body.rtl .lang-dropdown {
+              right: auto;
+              left: 0;
+          }
+
+          body.rtl .info-icon {
+              margin-left: 12px;
+              margin-right: 0;
+          }
+
+        .owner-dashboard {
+            padding: 20px;
+        }
+        .owner-status {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .dashboard-qr {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .dashboard-card {
+            background: 
+#f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .action-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .action-panel button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            background: 
+#667eea;
+            color: #fff;
+            cursor: pointer;
+        }
+        .locked-field {
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+
+        /* Redesigned dashboard */
+        .dashboard-container {
+            padding: 20px;
+        }
+        .dashboard-header {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .progress-ring {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .progress-text .percent {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .section-cards {
+            display: grid;
+            gap: 15px;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 640px) {
+            .section-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .section-cards {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .section-card {
+            background: 
+#f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            position: relative;
+        }
+        .section-card.complete {
+            opacity: 0.7;
+        }
+        .edit-section-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        .edit-section-btn:hover {
+            text-decoration: underline;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .section-icon {
+            font-size: 20px;
+        }
+        .mini-progress {
+            flex: 1;
+            height: 4px;
+            background: 
+#e0e0e0;
+            border-radius: 2px;
+            position: relative;
+        }
+        .mini-progress .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+        .field-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 0.875rem;
+            border-bottom: 1px solid var(--surface-alt);
+            min-height: 48px;
+        }
+        .field-row.missing {
+            opacity: 0.6;
+        }
+        .add-button {
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 500;
+            min-width: 44px;
+            min-height: 44px;
+            padding: 12px 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .add-button:hover {
+            text-decoration: underline;
+        }
+
+        .field-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .field-modal.active { display: flex; }
+        .modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            position: relative;
+            background: var(--surface);
+            padding: 32px;
+            border-radius: 12px;
+            z-index: 1;
+            max-width: 600px;
+            width: calc(100% - 40px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .modal-content h3 {
+            margin-bottom: 4px;
+        }
+        .modal-content input,
+        .modal-content select,
+        .modal-content textarea {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid 
+#e5e7eb;
+            border-radius: 8px;
+            font-size: 1.125rem;
+        }
+        .modal-content textarea {
+            min-height: 160px;
+            resize: vertical;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.125rem;
+        }
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.125rem;
+        }
+        .quick-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            background: 
+#f0f0f0;
+            cursor: pointer;
+        }
+        .action-btn.primary {
+            background: 
+#667eea;
+            color: #fff;
+        }
+        .badge {
+            background: #fff;
+            color: 
+#667eea;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+            font-size: 0.75rem;
+        }
+        .security-status .level-excellent { color: 
+#38a169; }
+        .security-status .level-good { color: 
+#48bb78; }
+        .security-status .level-fair { color: 
+#ed8936; }
+        .security-status .level-basic { color: 
+#e53e3e; }
+
+        @media (max-width: 480px) {
+            .lang-button {
+                padding: 4px 8px;
+                font-size: 0.75rem;
+            }
+
+            .login-btn,
+            .app-btn {
+                font-size: 0.75rem;
+            }
+
+            .dashboard-btn,
+            .logout-btn {
+                font-size: 12px;
+            }
+
+            .logo-text-full {
+                display: none;
+            }
+
+              .logo-text-short {
+                  display: inline;
+              }
+          }
+
+         .privacy-notice {
+             background: 
+#e8f4f8;
+             border: 2px solid 
+#4a90e2;
+             border-radius: 10px;
+             padding: 20px;
+             margin-bottom: 20px;
+             text-align: center;
+         }
+
+         .privacy-notice h3 {
+             color: 
+#2c5282;
+             margin-bottom: 15px;
+         }
+
+         .privacy-notice ul {
+             list-style: none;
+             padding: 0;
+         }
+
+         .privacy-notice li {
+             margin: 10px 0;
+             padding-left: 25px;
+             position: relative;
+         }
+
+        .privacy-notice li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: 
+#48bb78;
+            font-weight: bold;
+        }
+        /* Critical info helper */
+        .field-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #555;
+            margin-top: 4px;
+        }
+
+        /* Session timer styles */
+        .session-timer {
+            --progress: 0deg;
+            --ring-color: 
+#4caf50;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: conic-gradient(var(--ring-color) var(--progress), 
+#e0e0e0 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-left: 10px;
+        }
+        .session-timer::before {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            background: white;
+            border-radius: 50%;
+        }
+        .session-timer span {
+            font-size: 10px;
+            position: relative;
+        }
+        .session-timer.pulse {
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
+        }
+        .session-banner {
+            position: fixed;
+            top: -100px;
+            left: 0;
+            right: 0;
+            background: 
+#fff3cd;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: top 0.3s;
+            z-index: 1000;
+        }
+        .session-banner.active {
+            top: 0;
+        }
+        .session-banner button {
+            margin-left: 10px;
+        }
+        .session-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .session-modal.active {
+            display: flex;
+        }
+        .session-modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            animation: modalPulse 1s infinite alternate;
+        }
+        @keyframes modalPulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.02); }
+        }
+        .session-expired {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+        }
+        .session-expired.active {
+            display: flex;
+        }
+
+        .blood-type-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 12px 0;
+        }
+        .blood-type-btn {
+            position: relative;
+            min-height: 48px;
+            min-width: 48px;
+            border: 2px solid 
+#e5e7eb;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            transition: all 0.2s;
+        }
+        .blood-type-btn:hover,
+        .blood-type-btn:focus {
+            border-color: 
+#6366f1;
+            background: 
+#eef2ff;
+        }
+        .blood-type-btn.selected {
+            background: 
+#6366f1;
+            color: white;
+            border-color: 
+#6366f1;
+        }
+        .blood-type-btn input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .unknown-option {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            background: 
+#f9fafb;
+            border: 2px dashed 
+#d1d5db;
+            border-radius: 8px;
+        }
+        #add-secondary-contact {
+            width: 100%;
+        }
+        .search-dropdown {
+            position: absolute;
+            background: white;
+            border: 1px solid 
+#cbd5e0;
+            border-radius: 8px;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+        }
+        .search-dropdown .medication-option {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .search-dropdown .medication-option:hover {
+            background: 
+#f7fafc;
+        }
+        .med-name {
+            font-weight: 500;
+        }
+        .med-details {
+            font-size: 0.875rem;
+            color: 
+#718096;
+        }
+        .medication-list {
+            display: grid;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .medication-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+        .allergy-warnings .warning {
+            margin-top: 4px;
+            font-size: 0.875rem;
+        }
+        .allergy-warnings .high {
+            color: 
+#c53030;
+        }
+        .allergy-warnings .medium {
+            color: 
+#d69e2e;
+        }
+
+        .emergency-card {
+            margin: 16px;
+            padding: 16px;
+            background: 
+#fff5f5;
+            border: 2px dashed var(--danger);
+            border-radius: 12px;
+        }
+
+        .emergency-card h3 {
+            margin-bottom: 8px;
+        }
+
+        .access-911 {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .access-911:active {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="logo-container">
+            <div class="logo">🔑 <span class="logo-text-full">iKey</span><span class="logo-text-short">iKey</span></div>
+        </div>
+        <div class="controls">
+            <div class="size-controls">
+                <button class="size-toggle" onclick="changeTextSize(-1)">🔍-</button>
+                <button class="size-toggle" onclick="changeTextSize(1)">🔍+</button>
+            </div>
+            <div class="lang-select">
+                <button class="lang-button" onclick="toggleLangDropdown()"><span id="current-language">EN</span> ▼</button>
+                <div class="lang-dropdown"></div>
+            </div>
+            <button class="dashboard-btn" style="display:none;" onclick="showOwnerDashboard()">Dashboard</button>
+            <button class="health-records-btn" style="display:none;" onclick="showHealthRecordsTab()">EHR</button>
+            <button class="app-btn" onclick="showQRTab()">App</button>
+            <button class="login-btn" onclick="ownerLogin()">Owner Login</button>
+            <div id="session-timer" class="session-timer">
+                <span id="session-countdown"></span>
+            </div>
+            <button class="logout-btn" style="display:none;" onclick="logoutOwner()">Logout</button>
+        </div>
+    </div>
+    <div id="clientCreatorTab">
+        <!-- Explicit relative path ensures the client setup loads even when the app is served from a subdirectory -->
+        <iframe src="./client-qr-creator.html" style="border:none;width:100%;height:100vh;" title="Client setup"></iframe>
+    </div>
+    <div id="qrTab" style="display:none;">
+        <div class="container">
+            <div id="main-content">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+        </div>
+
+    <!-- Dev Tools Panel -->
+    <div class="dev-trigger" onclick="toggleDevTools()">🛠️</div>
+    <div id="dev-panel" class="dev-panel">
+        <h3>🛠️ Dev Tools</h3>
+
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="dev-guid" placeholder="Enter GUID">
+            <input type="text" id="dev-key" placeholder="Enter Key">
+            <button onclick="devLoadQR()">Load QR</button>
+            <button onclick="devTestArchive()">Test Archive Fetch</button>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <input type="file" id="dev-qr-upload" accept="image/*" style="margin-bottom: 10px;">
+            <button onclick="devScanQR()">Scan QR Image</button>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <button onclick="devShowRawData()">Show Raw Data</button>
+            <button onclick="devClearStorage()">Clear All Data</button>
+            <button onclick="toggleDevTools()">Close</button>
+        </div>
+
+        <div class="dev-output" id="dev-output"></div>
+    </div>
+
+    <!-- QR Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+class IKeyApp {
+  // Placeholder base class representing existing iKey functionality.
+}
+
+// Implements the three-layer encryption architecture used for QR data,
+// profile details and the double-wrapped health vault.
+class ThreeLayerEncryption {
+  // Generate a random 256-bit key encoded as base64
+  static generateQrKey() {
+    const buf = self.crypto.getRandomValues(new Uint8Array(32));
+    return this.arrayBufferToBase64(buf.buffer);
+  }
+
+  static arrayBufferToBase64(buffer) {
+    return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+  }
+
+  static base64ToArrayBuffer(str) {
+    return Uint8Array.from(atob(str), c => c.charCodeAt(0)).buffer;
+  }
+
+  static async importKey(base64Key) {
+    const raw = this.base64ToArrayBuffer(base64Key);
+    return await self.crypto.subtle.importKey(
+      'raw',
+      raw,
+      { name: 'AES-GCM' },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  }
+
+  static async deriveKey(material, salt, iterations) {
+    const enc = new TextEncoder();
+    const keyMaterial = await self.crypto.subtle.importKey(
+      'raw',
+      enc.encode(material),
+      'PBKDF2',
+      false,
+      ['deriveBits', 'deriveKey']
+    );
+
+    const key = await self.crypto.subtle.deriveKey(
+      {
+        name: 'PBKDF2',
+        salt,
+        iterations,
+        hash: 'SHA-256'
+      },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      true,
+      ['encrypt', 'decrypt']
+    );
+
+    const raw = await self.crypto.subtle.exportKey('raw', key);
+    return this.arrayBufferToBase64(raw);
+  }
+
+  static async derivePinKey(pin, salt) {
+    const enc = new TextEncoder();
+    const keyMaterial = await self.crypto.subtle.importKey(
+      'raw',
+      enc.encode(pin),
+      'PBKDF2',
+      false,
+      ['deriveBits', 'deriveKey']
+    );
+    const key = await self.crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      true,
+      ['encrypt', 'decrypt']
+    );
+    const raw = await self.crypto.subtle.exportKey('raw', key);
+    return this.arrayBufferToBase64(raw);
+  }
+
+  static async sha256(text) {
+    const data = new TextEncoder().encode(text);
+    const hash = await self.crypto.subtle.digest('SHA-256', data);
+    return this.arrayBufferToBase64(hash);
+  }
+
+  static async encrypt(obj, keyBase64) {
+    const key = await this.importKey(keyBase64);
+    const iv = self.crypto.getRandomValues(new Uint8Array(12));
+    const data = new TextEncoder().encode(JSON.stringify(obj));
+    const encrypted = await self.crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv },
+      key,
+      data
+    );
+    return {
+      iv: this.arrayBufferToBase64(iv.buffer),
+      data: this.arrayBufferToBase64(encrypted)
+    };
+  }
+
+  static async decrypt(encObj, keyBase64) {
+    const key = await this.importKey(keyBase64);
+    const iv = new Uint8Array(this.base64ToArrayBuffer(encObj.iv));
+    const data = this.base64ToArrayBuffer(encObj.data);
+    const decrypted = await self.crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv },
+      key,
+      data
+    );
+    const decoded = new TextDecoder().decode(decrypted);
+    return JSON.parse(decoded);
+  }
+
+  // Build encrypted record and return GUID + qrKey
+  static async buildRecord(emergencyInfo, privateInfo, healthRecords, pin) {
+    const guid = self.crypto.randomUUID();
+    const qrKey = this.generateQrKey();
+
+    const publicData = await this.encrypt(emergencyInfo, qrKey);
+
+    const pinSalt = self.crypto.getRandomValues(new Uint8Array(16));
+    const pinKey = await this.derivePinKey(pin, pinSalt);
+    const privateCipher = await this.encrypt(privateInfo, pinKey);
+
+    const vaultSalt = self.crypto.getRandomValues(new Uint8Array(16));
+    const vaultKey = await this.deriveKey(qrKey, vaultSalt, 100000);
+    const vaultEnc = await this.encrypt(healthRecords, vaultKey);
+
+    return {
+      guid,
+      qrKey,
+      storedData: {
+        publicData,
+        privateCipher,
+        pinSalt: this.arrayBufferToBase64(pinSalt.buffer),
+        vault: {
+          iv: vaultEnc.iv,
+          data: vaultEnc.data,
+          salt: this.arrayBufferToBase64(vaultSalt.buffer)
+        }
+      }
+    };
+  }
+
+  static async unlockPublic(storedData, qrKey) {
+    return await this.decrypt(storedData.publicData, qrKey);
+  }
+
+  static async unlockPrivate(storedData, pin) {
+    const salt = new Uint8Array(this.base64ToArrayBuffer(storedData.pinSalt));
+    const pinKey = await this.derivePinKey(pin, salt);
+    return await this.decrypt(storedData.privateCipher, pinKey);
+  }
+
+  static async unlockVault(storedData, qrKey) {
+    const vaultSalt = new Uint8Array(this.base64ToArrayBuffer(storedData.vault.salt));
+    const vaultKey = await this.deriveKey(qrKey, vaultSalt, 100000);
+    return await this.decrypt({ iv: storedData.vault.iv, data: storedData.vault.data }, vaultKey);
+  }
+}
+
+class UnifiedHealthApp extends IKeyApp {
+  constructor() {
+    super();
+    this.vaultUnlocked = false;
+    this.attachments = new Map();
+    this.phvData = { sections: {}, attachments: [] };
+  }
+
+  async createAttachment(data, type) {
+    // Placeholder for attachment creation and upload.
+    const guid = self.crypto.randomUUID();
+    this.attachments.set(guid, { data, type });
+    this.phvData.attachments.push({ guid, type });
+    return guid;
+  }
+
+  exportVault() {
+    return this.phvData;
+  }
+
+  importVault(vaultData) {
+    if (!vaultData) return;
+    this.phvData = vaultData;
+  }
+
+  async loadVault(password) {
+    // Placeholder for password verification and vault loading.
+    if (window.currentBlob && window.currentBlob.vault) {
+      this.importVault(window.currentBlob.vault);
+    }
+    this.vaultUnlocked = true;
+    return true;
+  }
+}
+
+// Expose a global instance for current UI to interact with
+if (typeof window !== 'undefined') {
+  window.healthApp = new UnifiedHealthApp();
+}
+
+// ----------------- helpers -----------------
+const state = { locations: [] }; // load from your decrypted vault on login
+
+const uid = (p = "loc") => `${p}_${Math.random().toString(36).slice(2,8)}${Date.now().toString(36)}`;
+
+const round6 = n => Math.round(Number(n) * 1e6) / 1e6;
+
+function validLatLng(lat, lng) {
+  const L = Number(lat), G = Number(lng);
+  return Number.isFinite(L) && Number.isFinite(G) && L >= -90 && L <= 90 && G >= -180 && G <= 180;
+}
+
+// Google Maps (no API key)
+const mapsOpen = ({ lat, lng }) => `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+const mapsEmbed = ({ lat, lng }) => `https://www.google.com/maps?q=${lat},${lng}&output=embed`;
+
+const categoryLabels = {
+  shelter: "🏠 Shelter",
+  food: "🍽️ Food",
+  medical: "🏥 Medical",
+  services: "🏪 Services",
+  contacts: "👥 Contacts",
+  personal: "📋 Personal"
+};
+const getCategoryLabel = cat => categoryLabels[cat] || cat;
+
+// ----------------- render -----------------
+function renderPlaces() {
+  const wrap = document.getElementById("placeList");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+
+  if (!state.locations.length) {
+    wrap.textContent = "No notes yet.";
+    return;
+  }
+
+  state.locations.forEach(loc => {
+    const card = document.createElement("div");
+    card.style.border = "1px solid #ddd";
+    card.style.borderRadius = "12px";
+    card.style.padding = "12px";
+    card.style.marginBottom = "12px";
+
+    const header = document.createElement("div");
+    header.style.display = "flex";
+    header.style.alignItems = "center";
+    header.style.gap = "6px";
+
+    const titleEl = document.createElement("div");
+    titleEl.style.fontWeight = "700";
+    titleEl.textContent = loc.title || "(Untitled note)";
+    header.appendChild(titleEl);
+
+    if (loc.category) {
+      const cat = document.createElement("span");
+      cat.textContent = getCategoryLabel(loc.category);
+      cat.style.background = "#667eea";
+      cat.style.color = "#fff";
+      cat.style.fontSize = "12px";
+      cat.style.padding = "2px 6px";
+      cat.style.borderRadius = "8px";
+      header.appendChild(cat);
+    }
+
+    card.appendChild(header);
+
+    if (loc.coords) {
+      const meta = document.createElement("div");
+      meta.style.fontSize = "12px";
+      meta.style.opacity = "0.8";
+      meta.textContent = `(${loc.coords.lat}, ${loc.coords.lng})`;
+      card.appendChild(meta);
+    }
+
+    if (loc.note) {
+      const p = document.createElement("div");
+      p.style.margin = "6px 0";
+      p.textContent = loc.note;
+      card.appendChild(p);
+    }
+
+    if (loc.coords) {
+      const iframe = document.createElement("iframe");
+      iframe.width = "100%";
+      iframe.height = "220";
+      iframe.style.border = "0";
+      iframe.loading = "lazy";
+      iframe.referrerPolicy = "no-referrer-when-downgrade";
+      iframe.src = mapsEmbed(loc.coords);
+      card.appendChild(iframe);
+
+      const a = document.createElement("a");
+      a.href = mapsOpen(loc.coords);
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = "Open in Google Maps";
+      a.style.display = "inline-block";
+      a.style.marginTop = "8px";
+      card.appendChild(a);
+    }
+
+    wrap.appendChild(card);
+  });
+}
+
+// ----------------- save -----------------
+async function savePlaceNote(place) {
+  state.locations.unshift(place);
+
+  try {
+    localStorage.setItem("ikey.places.draft", JSON.stringify(state.locations));
+  } catch {}
+
+  // Encrypt & persist using existing pipeline
+  // await vaultSave("vault", "locations", state.locations);
+
+  renderPlaces();
+}
+
+// ----------------- init -----------------
+if (typeof document !== 'undefined') {
+document.addEventListener("DOMContentLoaded", () => {
+  const modeRadios = Array.from(document.querySelectorAll('input[name="placeMode"]'));
+  const manualRow = document.getElementById("manualCoords");
+  const latInput = document.getElementById("latInput");
+  const lngInput = document.getElementById("lngInput");
+  const titleInput = document.getElementById("titleInput");
+  const noteInput = document.getElementById("noteInput");
+  const saveBtn = document.getElementById("savePlaceBtn");
+  const locationToggle = document.getElementById("locationToggle");
+  const locationOptions = document.getElementById("locationOptions");
+  const categoryButtons = Array.from(document.querySelectorAll(".category-btn"));
+  let selectedCategory = null;
+
+  if (!saveBtn) return;
+
+  const updateModeUI = () => {
+    const mode = modeRadios.find(r => r.checked)?.value || "here";
+    manualRow.style.display = mode === "manual" ? "flex" : "none";
+  };
+  modeRadios.forEach(r => r.addEventListener("change", updateModeUI));
+  updateModeUI();
+
+  const updateLocationUI = () => {
+    locationOptions.style.display = locationToggle.checked ? "block" : "none";
+  };
+  locationToggle.addEventListener("change", updateLocationUI);
+  updateLocationUI();
+
+  categoryButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (btn.classList.contains("selected")) {
+        btn.classList.remove("selected");
+        selectedCategory = null;
+      } else {
+        categoryButtons.forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedCategory = btn.dataset.category;
+      }
+    });
+  });
+
+  try {
+    const cached = JSON.parse(localStorage.getItem("ikey.places.draft") || "[]");
+    if (Array.isArray(cached)) state.locations = cached;
+  } catch {}
+
+  saveBtn.addEventListener("click", async () => {
+    const title = (titleInput.value || "").trim();
+    const note = (noteInput.value || "").trim();
+    const includeLocation = locationToggle.checked;
+
+    const reset = () => {
+      titleInput.value = "";
+      noteInput.value = "";
+      latInput.value = "";
+      lngInput.value = "";
+      categoryButtons.forEach(b => b.classList.remove("selected"));
+      selectedCategory = null;
+      locationToggle.checked = false;
+      updateLocationUI();
+    };
+
+    if (includeLocation) {
+      const mode = modeRadios.find(r => r.checked)?.value || "here";
+      if (mode === "manual") {
+        const lat = parseFloat(latInput.value);
+        const lng = parseFloat(lngInput.value);
+        if (!validLatLng(lat, lng)) {
+          alert("Please enter valid coordinates:\n-90 ≤ latitude ≤ 90\n-180 ≤ longitude ≤ 180");
+          return;
+        }
+        const place = {
+          id: uid(),
+          title,
+          note,
+          category: selectedCategory,
+          type: "coords",
+          coords: { lat: round6(lat), lng: round6(lng) },
+          createdAt: Date.now()
+        };
+        await savePlaceNote(place);
+        reset();
+        return;
+      }
+
+      if (!("geolocation" in navigator)) {
+        alert("Geolocation not available on this device/browser.");
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(pos => {
+        (async () => {
+          try {
+            const lat = round6(pos.coords.latitude);
+            const lng = round6(pos.coords.longitude);
+            if (!validLatLng(lat, lng)) {
+              alert("Got invalid coordinates from the device.");
+              return;
+            }
+            const place = {
+              id: uid(),
+              title,
+              note,
+              category: selectedCategory,
+              type: "coords",
+              coords: { lat, lng },
+              createdAt: Date.now()
+            };
+            await savePlaceNote(place);
+            reset();
+          } catch (e) {
+            console.error(e);
+          }
+        })();
+      }, err => {
+        alert("Couldn't get your location. You can switch to 'Enter coordinates'.");
+        console.error(err);
+      }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+      return;
+    }
+
+    const place = {
+      id: uid(),
+      title,
+      note,
+      category: selectedCategory,
+      type: "note",
+      createdAt: Date.now()
+    };
+    await savePlaceNote(place);
+    reset();
+  });
+
+  renderPlaces();
+});
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = { ThreeLayerEncryption };
+}
+</script>
+<script>
+const DRUGBANK_CONFIG = {
+  baseURL: 'https://api.drugbank.com/v1',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  }
+};
+
+class MedicationSearch {
+  constructor() {
+    this.searchTimeout = null;
+    this.minSearchLength = 3;
+    this.resultsContainer = null;
+    this.input = null;
+    this.onSelect = () => {};
+  }
+
+  async searchMedications(query) {
+    clearTimeout(this.searchTimeout);
+    return new Promise((resolve) => {
+      this.searchTimeout = setTimeout(async () => {
+        if (query.length < this.minSearchLength) {
+          resolve([]);
+          return;
+        }
+        try {
+          const response = await fetch(
+            `${DRUGBANK_CONFIG.baseURL}/drug_names?q=${encodeURIComponent(query)}&region=us&fuzzy=true&limit=10`,
+            { headers: DRUGBANK_CONFIG.headers }
+          );
+          const data = await response.json();
+          const formatted = data.hits.map(hit => ({
+            id: hit.ndc_product_code || hit.local_product_id,
+            drugbankId: hit.ingredients && hit.ingredients[0] ? hit.ingredients[0].drugbank_id : null,
+            displayName: hit.name,
+            genericName: hit.ingredients && hit.ingredients[0] ? hit.ingredients[0].name : '',
+            strength: hit.strength ? `${hit.strength.number || ''} ${hit.strength.unit || ''}`.trim() : '',
+            dosageForm: hit.dosage_form,
+            route: hit.route,
+            label: `${hit.name} - ${hit.strength ? (hit.strength.number + (hit.strength.unit || '')) : ''} (${hit.dosage_form})`,
+            fullData: hit
+          }));
+          resolve(formatted);
+        } catch (e) {
+          console.error('DrugBank API Error:', e);
+          resolve([]);
+        }
+      }, 300);
+    });
+  }
+
+  attach(input, resultsContainer, onSelect) {
+    this.input = input;
+    this.resultsContainer = resultsContainer;
+    this.onSelect = onSelect;
+    input.addEventListener('input', async () => {
+      const results = await this.searchMedications(input.value.trim());
+      this.renderResults(results);
+    });
+  }
+
+  renderResults(results) {
+    if (!this.resultsContainer) return;
+    this.resultsContainer.innerHTML = '';
+    if (!results.length) {
+      this.resultsContainer.style.display = 'none';
+      return;
+    }
+    this.resultsContainer.style.display = 'block';
+    results.forEach(med => {
+      const div = document.createElement('div');
+      div.className = 'medication-option';
+      div.innerHTML = `<div class="med-name">${med.displayName}</div>` +
+        `<div class="med-details">${med.genericName ? '(' + med.genericName + ') ' : ''}${med.strength} ${med.dosageForm}</div>`;
+      div.addEventListener('click', () => {
+        this.onSelect(med);
+        this.resultsContainer.innerHTML = '';
+        this.resultsContainer.style.display = 'none';
+        this.input.value = '';
+      });
+      this.resultsContainer.appendChild(div);
+    });
+  }
+}
+
+class AllergyChecker {
+  constructor() {
+    this.commonAllergens = [
+      { name: 'Penicillin', drugbankId: 'DB00417', variants: ['amoxicillin', 'ampicillin'] },
+      { name: 'Aspirin', drugbankId: 'DB00945', variants: ['ASA', 'acetylsalicylic acid'] },
+      { name: 'NSAIDs', drugbankIds: ['DB00328', 'DB00482'], variants: ['ibuprofen', 'naproxen'] },
+      { name: 'Sulfa drugs', pattern: 'sulfa', variants: ['sulfamethoxazole'] },
+      { name: 'Codeine', drugbankId: 'DB00318', variants: [] }
+    ];
+  }
+
+  async checkMedicationAllergies(medication, userAllergies) {
+    const warnings = [];
+    if (!medication.ingredients) return warnings;
+    medication.ingredients.forEach(ingredient => {
+      userAllergies.forEach(allergy => {
+        if (allergy.drugbankId && allergy.drugbankId === ingredient.drugbank_id) {
+          warnings.push({
+            severity: 'high',
+            message: `⚠️ This medication contains ${ingredient.name}, which you've marked as an allergy`
+          });
+        }
+        if (allergy.drugbankIds && allergy.drugbankIds.includes(ingredient.drugbank_id)) {
+          warnings.push({
+            severity: 'high',
+            message: `⚠️ This medication is in the ${allergy.name} class, which you've marked as an allergy`
+          });
+        }
+        if (allergy.variants) {
+          const ingredientLower = ingredient.name.toLowerCase();
+          allergy.variants.forEach(v => {
+            if (ingredientLower.includes(v.toLowerCase())) {
+              warnings.push({ severity: 'medium', message: `⚠️ This medication may be related to ${allergy.name}` });
+            }
+          });
+        }
+      });
+    });
+    return warnings;
+  }
+}
+
+function initMedicationField() {
+  const searchInput = document.getElementById('medication-search');
+  const results = document.getElementById('medication-results');
+  const list = document.getElementById('selected-medications');
+  const textarea = document.getElementById('medications');
+  if (!searchInput || !results || !list || !textarea) return;
+
+  const medicationSearch = new MedicationSearch();
+  const allergyChecker = new AllergyChecker();
+  const selected = [];
+
+  function renderSelected() {
+    list.innerHTML = '';
+    selected.forEach((med, idx) => {
+      const item = document.createElement('div');
+      item.className = 'medication-item';
+      item.innerHTML = `<div class="medication-name">${med.displayName}</div>` +
+        `<div class="medication-details">${med.strength} ${med.dosageForm}</div>`;
+      const btn = document.createElement('button');
+      btn.className = 'delete-btn';
+      btn.textContent = 'Remove';
+      btn.addEventListener('click', () => {
+        selected.splice(idx, 1);
+        textarea.value = selected.map(m => m.displayName).join(', ');
+        renderSelected();
+      });
+      item.appendChild(btn);
+      list.appendChild(item);
+    });
+    textarea.value = selected.map(m => m.displayName).join(', ');
+  }
+
+  medicationSearch.attach(searchInput, results, async (med) => {
+    const userAllergiesText = document.getElementById('allergies')?.value || '';
+    const userAllergies = userAllergiesText.split(',').map(a => a.trim()).filter(Boolean);
+    const warnings = await allergyChecker.checkMedicationAllergies(med.fullData, allergyChecker.commonAllergens.concat(userAllergies.map(name => ({ name }))));
+    const warningContainer = document.getElementById('allergy-warnings');
+    warningContainer.innerHTML = '';
+    warnings.forEach(w => {
+      const div = document.createElement('div');
+      div.className = `warning ${w.severity}`;
+      div.textContent = w.message;
+      warningContainer.appendChild(div);
+    });
+    selected.push(med);
+    renderSelected();
+  });
+}
+
+window.initMedicationField = initMedicationField;
+</script>
+<script>
+(function(){
+  const sizes = { standard: '16px', large: '20px', xlarge: '24px', xxlarge: '32px' };
+  const scaleFactors = { standard: 1, large: 1.25, xlarge: 1.5, xxlarge: 2 };
+  const order = Object.keys(sizes);
+
+  function applySizeToEmbeds(size) {
+    const scale = scaleFactors[size] || 1;
+    ['healthRecordsFrame', 'resourcesFrame'].forEach(id => {
+      const frame = document.getElementById(id);
+      if (!frame) return;
+      frame.style.transformOrigin = '0 0';
+      frame.style.transform = `scale(${scale})`;
+      frame.style.width = (100 / scale) + '%';
+      frame.style.height = (window.innerHeight / scale) + 'px';
+      try {
+        if (frame.contentWindow && typeof frame.contentWindow.applyTextSize === 'function') {
+          frame.contentWindow.applyTextSize(size);
+        }
+      } catch (e) {}
+    });
+  }
+
+  window.getCurrentScale = function() {
+    const current = localStorage.getItem('ikey_text_size') || 'standard';
+    return scaleFactors[current] || 1;
+  };
+
+  window.applyTextSize = function(size) {
+    document.documentElement.style.fontSize = sizes[size] || sizes.standard;
+    applySizeToEmbeds(size);
+  };
+
+  window.changeTextSize = function(delta) {
+    const current = localStorage.getItem('ikey_text_size') || 'standard';
+    const nextIndex = Math.min(Math.max(order.indexOf(current) + delta, 0), order.length - 1);
+    const next = order[nextIndex];
+    localStorage.setItem('ikey_text_size', next);
+    applyTextSize(next);
+  };
+
+  window.addEventListener('storage', e => {
+    if (e.key === 'ikey_text_size') {
+      applyTextSize(e.newValue);
+    }
+  });
+
+  const savedSize = localStorage.getItem('ikey_text_size') || 'standard';
+  applyTextSize(savedSize);
+})();
+</script>
+
+    <script>
+        // Configuration
+        // Base URL for generated QR links. Updated to match this project's path.
+        const VIEWER_URL = 'https://clovenbradshaw-ctrl.github.io/ikey3/';
+        const BEACON_TEXT = 'SQR:1';
+        const WEBHOOK_URL = 'https://n8n.intelechia.com/webhook/d5e99c29-2cf1-44c1-b5b4-95a1ca048441';
+        const MANUAL_AUTH_OVERRIDE = "YOUR_MANUAL_AUTH_KEY_HERE";
+        const ARCHIVE_BASE = 'https://archive.org/download/zuboff/';
+
+        const LANGUAGE_NAMES = {
+          en: 'English',
+          es: 'Español',
+          ar: 'العربية',
+          ku: 'کوردی',
+          vi: 'Tiếng Việt',
+          zh: '中文',
+          so: 'Soomaali',
+          my: 'မြန်မာ',
+          ne: 'नेपाली',
+          am: 'አማርኛ',
+          bn: 'বাংলা',
+          de: 'Deutsch',
+          el: 'Ελληνικά',
+          fa: 'فارسی',
+          fr: 'Français',
+          gu: 'ગુજરાતી',
+          he: 'עברית',
+          hi: 'हिन्दी',
+          ht: 'Kreyòl Ayisyen',
+          it: 'Italiano',
+          ja: '日本語',
+          ko: '한국어',
+          lo: 'ລາວ',
+          pa: 'ਪੰਜਾਬੀ',
+          pl: 'Polski',
+          pt: 'Português',
+          ru: 'Русский',
+          sw: 'Kiswahili',
+          ta: 'தமிழ்',
+          te: 'తెలుగు',
+          th: 'ไทย',
+          tl: 'Tagalog',
+          tr: 'Türkçe',
+          uk: 'Українська',
+          ur: 'اردو'
+        };
+
+        const PRIMARY_LANGS = ['en', 'es', 'ar', 'ku'];
+        const RTL_LANGS = ['ar', 'ku', 'fa', 'he', 'ur'];
+
+        let translations = {};
+
+        let currentLanguage = 'en';
+
+        function createLangButton(code) {
+          const item = document.createElement('div');
+          item.className = 'lang-option';
+          item.dataset.lang = code;
+          item.textContent = `${code.toUpperCase()} ${LANGUAGE_NAMES[code] || code}`;
+          item.setAttribute('dir', 'auto');
+          item.addEventListener('click', () => {
+            setLanguage(code);
+            toggleLangDropdown(false);
+          });
+          return item;
+        }
+
+        function buildLanguageButtons() {
+          const dropdown = document.querySelector('.lang-dropdown');
+          if (!dropdown) return;
+          dropdown.innerHTML = '';
+          const codes = [...PRIMARY_LANGS, ...Object.keys(translations).filter(c => !PRIMARY_LANGS.includes(c))];
+          codes.forEach(code => {
+            if (translations[code]) {
+              dropdown.appendChild(createLangButton(code));
+            }
+          });
+        }
+
+        function setLanguage(langCode) {
+          currentLanguage = langCode;
+          localStorage.setItem('ikey_preferred_language', langCode);
+
+          document.documentElement.lang = langCode;
+          document.documentElement.dir = RTL_LANGS.includes(langCode) ? 'rtl' : 'ltr';
+
+          const t = translations[langCode] || translations.en || {};
+          document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (t[key]) el.textContent = t[key];
+          });
+          document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (t[key]) el.placeholder = t[key];
+          });
+
+          document.body.classList.toggle('rtl', RTL_LANGS.includes(langCode));
+
+          document.getElementById('current-language').textContent = langCode.toUpperCase();
+          document.querySelectorAll('.lang-option').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.lang === langCode);
+          });
+        }
+
+        function toggleLangDropdown(force) {
+          const dropdown = document.querySelector('.lang-dropdown');
+          if (!dropdown) return;
+          const shouldShow = force !== undefined ? force : dropdown.style.display !== 'block';
+          dropdown.style.display = shouldShow ? 'block' : 'none';
+        }
+
+        document.addEventListener('click', function(e) {
+          const dropdown = document.querySelector('.lang-dropdown');
+          const button = document.querySelector('.lang-button');
+          if (!dropdown || !button) return;
+          if (!dropdown.contains(e.target) && !button.contains(e.target)) {
+            dropdown.style.display = 'none';
+          }
+        });
+
+        // State
+        let currentGUID = null;
+        let currentKey = null;
+        let currentData = null; // {encrypted, version, data}
+        let currentBlob = null; // decrypted full data
+        let currentMode = null;
+        let currentCreated = null;
+        let currentName = null;
+        let currentBloodType = null;
+        let currentAllergies = null;
+        let ownerPassword = null;
+        let uploadCheckInterval = null;
+        let sessionTimeoutHandle = null;
+        const SESSION_DURATION = 15 * 60 * 1000;
+
+        async function parseAndDisplay() {
+            const hash = window.location.hash.substring(1);
+
+            if (!hash) {
+                currentMode = 'create';
+                showCreationForm();
+                return;
+            }
+
+            // Handle legacy format
+            if (!hash.startsWith('v2:')) {
+                return handleLegacyFormat(hash);
+            }
+
+            const [version, guid, key, embeddedStr] = hash.split(':');
+            currentGUID = guid;
+            currentKey = key;
+            currentMode = 'view';
+            const embedded = JSON.parse(atob(embeddedStr));
+            currentName = embedded.n;
+            currentBloodType = embedded.b || null;
+            currentAllergies = embedded.a || null;
+            currentCreated = embedded.t || null;
+
+            // Show embedded data immediately
+            displayBasicInfo({
+                name: currentName,
+                bloodType: currentBloodType,
+                allergies: currentAllergies
+            });
+
+            // Attempt to load full data (non-blocking)
+            fetch(${ARCHIVE_BASE}${guid}.json?ts=${Date.now()}, { mode: 'cors', cache: 'no-store' })
+                .then(r => r.json())
+                .then(async data => {
+                    const full = JSON.parse(await decrypt(data.data, key));
+                    displayFullInfo({
+                        ...full,
+                        name: currentName,
+                        publicInfo: {
+                            ...full.publicInfo,
+                            bloodType: currentBloodType || full.publicInfo?.bloodType,
+                            allergies: currentAllergies || full.publicInfo?.allergies
+                        }
+                    });
+                })
+                .catch(() => {
+                    addOfflineNotice();
+                });
+        }
+
+        function displayBasicInfo({ name, bloodType, allergies }) {
+            const container = document.getElementById('main-content');
+            container.innerHTML = 
+                <div class="info-card">
+                    <div class="info-header">
+                        <h2><span class="info-icon">🔑</span><span data-i18n="emergencyInfo">Personal Information</span></h2>
+                    </div>
+                    <div class="content">
+                        <div class="info-section">
+                            <div class="info-item">
+                                <span class="info-icon">👤</span>
+                                <div class="info-content">
+                                    <div class="info-label" data-i18n="name">Name</div>
+                                    <div class="info-value">${name || 'Unknown'}</div>
+                                </div>
+                            </div>
+                            ${bloodType ? <div class="info-item"><span class="info-icon">🩸</span><div class="info-content"><div class="info-label" data-i18n="bloodType">Blood Type</div><div class="info-value">${bloodType}</div></div></div> : ''}
+                            ${allergies ? <div class="info-item"><span class="info-icon">⚠️</span><div class="info-content"><div class="info-label" data-i18n="allergies">Allergies</div><div class="info-value">${allergies}</div></div></div> : ''}
+                        </div>
+                        <div class="status-message status-info" id="loading-message">Loading additional information...</div>
+                    </div>
+                </div>;
+            setLanguage(currentLanguage);
+        }
+
+        function displayFullInfo(full) {
+            currentBlob = full;
+            displayEmergencyInfo(full);
+        }
+
+        function buildUploadMessage() {
+            if (currentCreated) {
+                const ageMinutes = Math.floor((Date.now() - new Date(currentCreated).getTime()) / 60000);
+                return ⏳ Data still uploading... (${ageMinutes} min old, usually ready in 5-30 min);
+            }
+            return '⏳ Data still uploading... (usually ready in 5-30 min)';
+        }
+
+        function addOfflineNotice() {
+            const el = document.getElementById('loading-message');
+            if (el) el.textContent = buildUploadMessage();
+            if (!uploadCheckInterval) {
+                startUploadStatusPolling();
+            }
+        }
+
+        function startUploadStatusPolling() {
+            uploadCheckInterval = setInterval(async () => {
+                try {
+                    const full = await fetchFromArchive(currentGUID, currentKey);
+                    clearInterval(uploadCheckInterval);
+                    uploadCheckInterval = null;
+                    displayFullInfo({
+                        ...full,
+                        name: currentName,
+                        publicInfo: {
+                            ...full.publicInfo,
+                            bloodType: currentBloodType || full.publicInfo?.bloodType,
+                            allergies: currentAllergies || full.publicInfo?.allergies
+                        }
+                    });
+                } catch (error) {
+                    const el = document.getElementById('loading-message');
+                    if (el) el.textContent = buildUploadMessage();
+                }
+            }, 10000);
+        }
+
+        function handleLegacyFormat(hash) {
+            const parts = hash.split('|');
+            if (parts.length === 3) {
+                const [guid, key, dataStr] = parts;
+                loadEmergencyInfo(guid, key, dataStr);
+            } else {
+                currentMode = 'create';
+                showCreationForm();
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', async function() {
+            if (Object.keys(translations).length === 0) {
+                try {
+                    const response = await fetch('translations.json');
+                    const data = await response.json();
+                    translations = data.translations || data;
+                } catch (error) {
+                    console.error('Failed to load translations:', error);
+                }
+            }
+
+            buildLanguageButtons();
+
+            const savedLang =
+                localStorage.getItem('ikey_preferred_language') ||
+                navigator.language.substring(0, 2) ||
+                'en';
+            setLanguage(savedLang);
+
+            await parseAndDisplay();
+
+            const storedPassword = sessionStorage.getItem('ownerPassword');
+            if (storedPassword) {
+                const expiry = parseInt(sessionStorage.getItem('ownerSessionExpires'), 10);
+                if (expiry && expiry > Date.now()) {
+                    ownerPassword = storedPassword;
+                    document.querySelector('.login-btn').style.display = 'none';
+                    document.querySelector('.dashboard-btn').style.display = 'inline-block';
+                    document.querySelector('.logout-btn').style.display = 'inline-block';
+                    document.querySelector('.health-records-btn').style.display = 'inline-block';
+                    showOwnerDashboard();
+                    startSessionTimer(expiry - Date.now());
+                } else {
+                    sessionStorage.removeItem('ownerPassword');
+                    sessionStorage.removeItem('ownerSessionExpires');
+                }
+            }
+        });
+
+        async function loadEmergencyInfo(guid, key, permanentDataStr) {
+            currentGUID = guid;
+            currentKey = key;
+
+            const permanentData = JSON.parse(atob(permanentDataStr));
+            const displayData = {
+                name: permanentData.n,
+                bloodType: permanentData.b,
+                allergies: permanentData.a,
+                medications: permanentData.m,
+                contact: (permanentData.cn || permanentData.cp)
+                    ? { name: permanentData.cn || '', phone: permanentData.cp || '' }
+                    : null
+            };
+
+            currentBlob = { publicInfo: displayData };
+            await displayEmergencyInfo(currentBlob);
+
+            try {
+                const response = await fetch(${ARCHIVE_BASE}${guid}.json?ts=${Date.now()}, { mode: 'cors', cache: 'no-store' });
+                if (response.ok) {
+                    const archiveData = await response.json();
+                    const decrypted = await decrypt(archiveData.editable, key);
+                    const editableFields = JSON.parse(decrypted);
+                    if (editableFields.publicInfo) {
+                        const pub = editableFields.publicInfo;
+                        if (pub.bloodType) displayData.bloodType = displayData.bloodType || pub.bloodType;
+                        if (pub.allergies) displayData.allergies = displayData.allergies || pub.allergies;
+                        if (pub.medications) displayData.medications = displayData.medications || pub.medications;
+                        if (pub.contact) {
+                            displayData.contact = pub.contact;
+                        }
+                        if (pub.secondaryContact) {
+                            displayData.secondaryContact = pub.secondaryContact;
+                        }
+                    } else {
+                        if (editableFields.bloodType) displayData.bloodType = displayData.bloodType || editableFields.bloodType;
+                        if (editableFields.allergies) displayData.allergies = displayData.allergies || editableFields.allergies;
+                        if (editableFields.contactName || editableFields.contactPhone) {
+                            displayData.contact = displayData.contact || {};
+                            if (editableFields.contactName) displayData.contact.name = editableFields.contactName;
+                            if (editableFields.contactPhone) displayData.contact.phone = editableFields.contactPhone;
+                        }
+                    }
+                    currentBlob.publicInfo = displayData;
+                    await displayEmergencyInfo(currentBlob);
+                }
+            } catch (e) {
+                console.log('Could not load editable fields', e);
+            }
+        }
+
+        async function handleOfflineQR(data) {
+            currentKey = data.k;
+            const publicInfo = {
+                name: data.n,
+                bloodType: data.b,
+                allergies: data.a,
+                contact: data.c ? JSON.parse(atob(data.c)) : null
+            };
+            const privateInfo = data.p
+                ? JSON.parse(await decrypt(data.p, data.k))
+                : null;
+            currentBlob = { publicInfo, privateInfo };
+            await displayEmergencyInfo(currentBlob, {
+                banner: '✅ Offline QR - No internet required'
+            });
+        }
+
+        async function handleHybridQR(guid, key, embedded) {
+            currentGUID = guid;
+            currentKey = key;
+            const publicInfo = {
+                name: embedded.n,
+                bloodType: embedded.b || 'Loading...',
+                allergies: embedded.a || 'Loading...'
+            };
+            await displayEmergencyInfo(
+                { publicInfo },
+                {
+                    banner:
+                        '🔄 Hybrid mode - Critical data available, loading additional info...'
+                }
+            );
+            try {
+                const cloudData = await fetchFromArchive(guid, key);
+                const merged = { ...cloudData };
+                if (embedded.b) merged.publicInfo.bloodType = embedded.b;
+                if (embedded.a) merged.publicInfo.allergies = embedded.a;
+                await displayEmergencyInfo(merged);
+            } catch (error) {
+                console.log('Cloud fetch failed, using embedded data only');
+            }
+        }
+
+        async function handleCloudQR(parts) {
+            const [guid, key, name, created] = parts.map(p => decodeURIComponent(p || ''));
+            if (guid && key) {
+                currentMode = 'view';
+                currentCreated = created;
+                currentName = name;
+                showLoadingScreen(name);
+                await loadAndDisplayEmergencyInfo(guid, key, name, created);
+            } else {
+                currentMode = 'create';
+                showCreationForm();
+            }
+        }
+
+        async function fetchFromArchive(guid, key) {
+            const archiveUrl = ${ARCHIVE_BASE}${guid}.json?ts=${Date.now()};
+            const response = await fetch(archiveUrl, { mode: 'cors', cache: 'no-store' });
+            if (!response.ok) throw new Error('Not found');
+            const data = await response.json();
+            const decrypted = await decrypt(data.data, key);
+            const fullData = JSON.parse(decrypted);
+            currentData = data;
+            currentBlob = { ...fullData };
+            return currentBlob;
+        }
+
+        // Show loading screen
+        function showLoadingScreen(name) {
+            const container = document.getElementById('main-content');
+            container.innerHTML = 
+                <div class="loading-screen">
+                    <div class="spinner"></div>
+                    <p>Loading personal information${name ?  for ${name} : ''}...</p>
+                </div>
+            ;
+        }
+
+        // Load and display emergency info
+        async function loadAndDisplayEmergencyInfo(guid, key, urlName, created) {
+            currentGUID = guid;
+            currentKey = key;
+
+            console.log('Loading emergency info for:', guid);
+            console.log('Created timestamp:', created);
+
+            const createdTime = created ? new Date(decodeURIComponent(created)) : null;
+            let banner = null;
+            let data;
+            let fetchSuccess = false;
+
+            // Calculate age of QR code
+            if (createdTime) {
+                const ageMinutes = (Date.now() - createdTime.getTime()) / 60000;
+                console.log('QR code age in minutes:', ageMinutes);
+
+                if (ageMinutes < 5) {
+                    banner = '⏳ Data still uploading to backup servers (usually takes 5-30 minutes). QR code works locally in the meantime.';
+                } else if (ageMinutes < 30) {
+                    banner = '⏳ Data may still be uploading to backup servers. If not loading, please wait a few more minutes.';
+                }
+            }
+
+            try {
+                // Try to fetch from Archive.org
+                const archiveUrl = ${ARCHIVE_BASE}${guid}.json?ts=${Date.now()};
+                console.log('Fetching from Archive.org:', archiveUrl);
+
+                const response = await fetch(archiveUrl, { mode: 'cors', cache: 'no-store' });
+                console.log('Archive.org response status:', response.status);
+
+                if (response.ok) {
+                    data = await response.json();
+                    fetchSuccess = true;
+                    console.log('Successfully loaded from Archive.org');
+                } else {
+                    throw new Error('Not found on Archive.org');
+                }
+            } catch (error) {
+                console.log('Archive fetch failed:', error.message);
+
+                // Check local storage fallback
+                const localData = localStorage.getItem('pending_' + guid);
+                if (localData) {
+                    console.log('Found local fallback data');
+                    const parsed = JSON.parse(localData);
+                    data = { local: true, full: parsed };
+                }
+            }
+
+            if (!fetchSuccess && createdTime) {
+                const ageMinutes = (Date.now() - createdTime.getTime()) / 60000;
+                if (ageMinutes < 5) {
+                    banner = '⏳ Data uploading to Archive.org - this usually takes 5-30 minutes. Your QR works locally for now!';
+                } else if (ageMinutes < 30) {
+                    banner = '⏳ Data may still be uploading - Archive.org backup can take up to 30 minutes to complete';
+                } else {
+                    banner = '⚠️ Data not found on Archive.org - backup may have failed. Try re-uploading.';
+                }
+            }
+
+            if (!data) {
+                await displayEmergencyInfo({ publicInfo: { name: urlName || 'Unknown' } }, { overrideName: urlName, banner });
+                return;
+            }
+
+            try {
+                let fullData;
+                if (data.local) {
+                    fullData = data.full;
+                } else {
+                    const decrypted = await decrypt(data.data, key);
+                    fullData = JSON.parse(decrypted);
+                }
+
+                // Validate beacon
+                if (fullData.beacon !== BEACON_TEXT) {
+                    throw new Error('Invalid QR code');
+                }
+
+                currentData = data;
+                currentBlob = { ...fullData };
+
+                await displayEmergencyInfo(fullData, { overrideName: urlName, banner });
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showError('Unable to load personal information. Please check the QR code.');
+            }
+        }
+
+        // Display emergency information
+        async function displayEmergencyInfo(fullData, options = {}) {
+            const container = document.getElementById('main-content');
+
+            const publicInfo = fullData.publicInfo || {};
+            const nameToShow = options.overrideName || fullData.name || publicInfo.name || 'Unknown';
+
+            let html = 
+                <div class="info-card">
+                    <div class="info-header">
+                        <h2><span class="info-icon">🔑</span><span data-i18n="emergencyInfo">Personal Information</span></h2>
+                    </div>
+                    ${options.banner ? <div class="status-message status-info">${options.banner}</div>` : ''}
+
+                    <div class="content">
+                        <div class="info-section">
+                            <div class="info-item">
+                                <span class="info-icon">👤</span>
+                                <div class="info-content">
+                                    <div class="info-label" data-i18n="name">Name</div>
+                                    <div class="info-value">${nameToShow}</div>
+                                </div>
+                            </div>
+            ;
+            if (fullData.pronouns) {
+                html += 
+                            <div class="info-item">
+                                <span class="info-icon">🗣️</span>
+                                <div class="info-content">
+                                    <div class="info-label" data-i18n="pronouns">Pronouns</div>
+                                    <div class="info-value">${fullData.pronouns}</div>
+                                </div>
+                            </div>
+                `;
+            }
+
+            if (fullData.criticalInfo) {
+                html += 
+                            <div class="info-item">
+                                <span class="info-icon">⚠️</span>
+                                <div class="info-content">
+                                    <div class="info-label" data-i18n="criticalInfo">Critical Information</div>
+                                    <div class="info-value">${fullData.criticalInfo}</div>
+                                </div>
+                            </div>
+                ;
+            }
+
+            if (publicInfo.bloodType) {
+                html += 
+                            <div class="info-item">
+                                <span class="info-icon">🩸</span>
+                                <div class="info-content">
+                                    <div class="info-label" data-i18n="bloodType">Blood Type</div>
+                                    <div class="info-value">${publicInfo.bloodType}</div>
+                                </div>
+                            </div>
+                ;
+            }
+
+            if (publicInfo.allergies) {
+                html += 
+                            <div class="info-item">
+                                <span class="info-icon">⚠️</span>
+                                <div class="info-content">
+                                    <div class="info-label" data-i18n="allergies">Allergies</div>
+                                    <div class="info-value">${publicInfo.allergies}</div>
+                                </div>
+                            </div>
+                ;
+            }
+
+            if (publicInfo.medications) {
+                html += 
+                            <div class="info-item">
+                                <span class="info-icon">💊</span>
+                                <div class="info-content">
+                                    <div class="info-label" data-i18n="medications">Medications</div>
+                                    <div class="info-value">${publicInfo.medications}</div>
+                                </div>
+                            </div>
+                ;
+            }
+
+            html += </div>;
+
+            if (publicInfo.contact) {
+                html += 
+                        <div class="info-section">
+                            <div class="info-item">
+                                <span class="info-icon">📞</span>
+                                <div class="info-content">
+                                    <div class="info-label" data-i18n="emergencyContact">Primary Contact</div>
+                                    <div class="info-value">
+                                        ${publicInfo.contact.name}${publicInfo.contact.relationship ? ' (' + publicInfo.contact.relationship + ')' : ''}
+                                        <a href="tel:${publicInfo.contact.phone}" class="phone-link">
+                                            📱 ${publicInfo.contact.phone}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                ;
+            }
+            if (publicInfo.secondaryContact) {
+                html += 
+                        <div class="info-section">
+                            <div class="info-item">
+                                <span class="info-icon">📞</span>
+                                <div class="info-content">
+                                    <div class="info-label">Secondary Contact</div>
+                                    <div class="info-value">
+                                        ${publicInfo.secondaryContact.name}${publicInfo.secondaryContact.relationship ? ' (' + publicInfo.secondaryContact.relationship + ')' : ''}
+                                        <a href="tel:${publicInfo.secondaryContact.phone}" class="phone-link">
+                                            📱 ${publicInfo.secondaryContact.phone}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                ;
+            }
+
+            html += 
+                        <div class="emergency-card">
+                            <h3>🚨 Emergency Services</h3>
+                            <p style="margin-bottom:8px;">Double-click to open</p>
+                            <button class="access-911" ondblclick="confirmEmergencyAccess()" title="Double-click to activate">
+                                Access Emergency Services
+                            </button>
+                        </div>
+                ;
+
+            html +=
+                        <div class="help-link">
+                            <a href="#" onclick="toggleHelp(); return false;">How It Works</a>
+                            <div id="help-content" class="help-content"></div>
+                        </div>
+                    </div>
+                </div>
+            ;
+
+            html += `
+                <div id="private-section">
+                  <button id="unlock-btn">Unlock</button>
+                  <form id="pin-form" style="display:none;">
+                    <input id="pin-input" type="password" inputmode="numeric" pattern="\\d{6}" maxlength="6" required />
+                    <button type="submit">Unlock</button>
+                    <span id="pin-error" class="hint"></span>
+                  </form>
+                  <pre id="private-data"></pre>
+                </div>`;
+
+            container.innerHTML = html;
+            setLanguage(currentLanguage);
+
+            if (fullData.privateCipher && fullData.pinSalt) {
+                const unlockBtn = document.getElementById('unlock-btn');
+                const pinForm = document.getElementById('pin-form');
+                const pinInput = document.getElementById('pin-input');
+                const pinError = document.getElementById('pin-error');
+                const privateDataEl = document.getElementById('private-data');
+                let attempts = 0;
+                let locked = false;
+
+                unlockBtn.addEventListener('click', () => {
+                    unlockBtn.style.display = 'none';
+                    pinForm.style.display = 'block';
+                });
+
+                pinForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (locked) return;
+                    const pin = pinInput.value.trim();
+                    if (!/^\\d{6}$/.test(pin)) {
+                        pinError.textContent = 'Enter 6-digit PIN';
+                        return;
+                    }
+                    try {
+                        const salt = new Uint8Array(ThreeLayerEncryption.base64ToArrayBuffer(fullData.pinSalt));
+                        const key = await ThreeLayerEncryption.derivePinKey(pin, salt);
+                        const priv = await ThreeLayerEncryption.decrypt(fullData.privateCipher, key);
+                        privateDataEl.textContent = JSON.stringify(priv, null, 2);
+                        pinForm.style.display = 'none';
+                    } catch (err) {
+                        attempts++;
+                        pinError.textContent = 'Incorrect PIN';
+                        if (attempts >= 3) {
+                            locked = true;
+                            pinInput.disabled = true;
+                            setTimeout(() => {
+                                locked = false;
+                                attempts = 0;
+                                pinInput.disabled = false;
+                                pinError.textContent = '';
+                            }, 30000);
+                        }
+                    }
+                });
+            } else {
+                const sec = document.getElementById('private-section');
+                if (sec) sec.style.display = 'none';
+            }
+        }
+
+        async function ownerLogin() {
+            if (!currentGUID) {
+                alert('No QR code loaded. Please create or load one before logging in.');
+                return;
+            }
+            let password = ownerPassword;
+            if (!password) {
+                password = prompt('Please enter your password to archive new data for this iKey.');
+                if (!password) {
+                    return;
+                }
+            }
+            const verified = await verifyOwnerPassword(password);
+            if (verified) {
+                ownerPassword = password;
+                sessionStorage.setItem('ownerPassword', ownerPassword);
+                document.querySelector('.login-btn').style.display = 'none';
+                document.querySelector('.dashboard-btn').style.display = 'inline-block';
+                document.querySelector('.logout-btn').style.display = 'inline-block';
+                showOwnerDashboard();
+                startSessionTimer();
+                document.querySelector('.health-records-btn').style.display = 'inline-block';
+            }
+        }
+
+        function logoutOwner() {
+            ownerPassword = null;
+            sessionStorage.removeItem('ownerPassword');
+            sessionStorage.removeItem('ownerSessionExpires');
+
+            document.querySelector('.dashboard-btn').style.display = 'none';
+            document.querySelector('.health-records-btn').style.display = 'none';
+            document.querySelector('.logout-btn').style.display = 'none';
+            document.querySelector('.login-btn').style.display = 'inline-block';
+
+            localStorage.removeItem('ikey_last_view');
+
+            if (sessionTimeoutHandle) {
+                clearTimeout(sessionTimeoutHandle);
+                sessionTimeoutHandle = null;
+            }
+
+            if (currentGUID && currentKey) {
+                displayEmergencyInfo(currentBlob);
+            } else {
+                showCreationForm();
+            }
+
+            document.getElementById('clientCreatorTab').style.display = 'none';
+            document.getElementById('healthRecordsTab').style.display = 'none';
+            document.getElementById('text911Tab').style.display = 'none';
+            document.getElementById('qrTab').style.display = 'block';
+        }
+
+        function startSessionTimer(remaining) {
+            if (sessionTimeoutHandle) {
+                clearTimeout(sessionTimeoutHandle);
+            }
+            const duration = remaining !== undefined ? remaining : SESSION_DURATION;
+            sessionStorage.setItem('ownerSessionExpires', Date.now() + duration);
+            sessionTimeoutHandle = setTimeout(() => {
+                alert('Session timed out');
+                logoutOwner();
+            }, duration);
+        }
+
+        function verifyOwnerPassword(password) {
+            // Manual auth override - skip verification
+            return Promise.resolve(true);
+        }
+
+        function showOwnerDashboard() {
+            // Ensure the dashboard content is visible regardless of the current tab
+            document.getElementById('clientCreatorTab').style.display = 'none';
+            document.getElementById('qrTab').style.display = 'block';
+            document.getElementById('text911Tab').style.display = 'none';
+            document.getElementById('healthRecordsTab').style.display = 'none';
+
+            currentMode = 'dashboard';
+            const container = document.getElementById('main-content');
+
+            const fields = {
+                basic: {
+                    name: currentBlob.name,
+                    pronouns: currentBlob.pronouns,
+                    criticalInfo: currentBlob.criticalInfo
+                },
+                emergency: {
+                    bloodType: currentBlob.publicInfo?.bloodType,
+                    allergies: currentBlob.publicInfo?.allergies,
+                    medications: currentBlob.publicInfo?.medications
+                },
+                contacts: {
+                    primary: currentBlob.publicInfo?.contact,
+                    secondary: currentBlob.publicInfo?.secondaryContact
+                },
+                private: {
+                    ssn: currentBlob.privateInfo?.ssn,
+                    insurance: currentBlob.privateInfo?.insurance,
+                    medicalNotes: currentBlob.privateInfo?.notes
+                },
+                vault: {
+                    records: currentBlob.vault?.records?.length || 0
+                }
+            };
+
+            let totalFields = 0;
+            let filledFields = 0;
+
+            const checkField = (value) => {
+                totalFields++;
+                if (value && value !== '' && value !== '-') {
+                    filledFields++;
+                    return true;
+                }
+                return false;
+            };
+
+            const sections = {
+                basic: { filled: 0, total: 2 },
+                emergency: { filled: 0, total: 3 },
+                contacts: { filled: 0, total: 2 },
+                private: { filled: 0, total: 3 },
+                vault: { filled: 0, total: 1 }
+            };
+
+            if (checkField(fields.basic.name)) sections.basic.filled++;
+            if (checkField(fields.basic.criticalInfo)) sections.basic.filled++;
+            if (checkField(fields.emergency.bloodType)) sections.emergency.filled++;
+            if (checkField(fields.emergency.allergies)) sections.emergency.filled++;
+            if (checkField(fields.emergency.medications)) sections.emergency.filled++;
+            if (checkField(fields.contacts.primary?.name)) sections.contacts.filled++;
+            if (checkField(fields.contacts.secondary?.name)) sections.contacts.filled++;
+            if (checkField(fields.private.ssn)) sections.private.filled++;
+            if (checkField(fields.private.insurance)) sections.private.filled++;
+            if (checkField(fields.private.medicalNotes)) sections.private.filled++;
+            if (fields.vault.records > 0) sections.vault.filled++;
+
+            const completionPercent = Math.round((filledFields / totalFields) * 100);
+            const securityLevel =
+                completionPercent >= 80 ? 'Excellent' :
+                completionPercent >= 60 ? 'Good' :
+                completionPercent >= 40 ? 'Fair' : 'Basic';
+
+            container.innerHTML = `
+                <div class="dashboard-container">
+                    <div class="dashboard-header">
+                        <div class="progress-ring">
+                            <svg width="120" height="120">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="
+#e0e0e0" stroke-width="8"/>
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="
+#667eea" stroke-width="8"
+                                        stroke-dasharray="${339 * completionPercent / 100} 339"
+                                        transform="rotate(-90 60 60)"/>
+                            </svg>
+                            <div class="progress-text">
+                                <div class="percent">${completionPercent}%</div>
+                                <div class="label">Complete</div>
+                            </div>
+                        </div>
+                        <div class="profile-summary">
+                            <h2>${fields.basic.name || 'Your iKey'}</h2>
+                            <p class="security-status">Security Level: <span class="level-${securityLevel.toLowerCase()}">${securityLevel}</span></p>
+                            <p class="last-updated">Last updated: <span id="last-updated-time">${currentBlob.metadata?.updated || 'Never'}</span> <span id="autosave-status"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="section-cards">
+                        ${renderSectionCard('Basic Info', '👤', sections.basic, [
+                            { label: 'Name', value: fields.basic.name, required: true },
+                            ...(fields.basic.pronouns ? [{ label: 'Pronouns', value: fields.basic.pronouns }] : []),
+                            { label: 'Critical Info', value: fields.basic.criticalInfo }
+                        ], null, 'basic')}
+
+                        ${renderSectionCard('Emergency', '🚨', sections.emergency, [
+                            { label: 'Blood Type', value: fields.emergency.bloodType },
+                            { label: 'Allergies', value: fields.emergency.allergies },
+                            { label: 'Medications', value: fields.emergency.medications, missing: true, section: 'emergency', field: 'medications' }
+                        ], null, 'emergency')}
+
+                        ${renderSectionCard('Contacts', '📞', sections.contacts, [
+                            { label: 'Primary', value: fields.contacts.primary?.name },
+                            { label: 'Secondary', value: fields.contacts.secondary?.name, missing: true, section: 'contacts', field: 'secondary' }
+                        ], null, 'contacts')}
+
+                        ${renderSectionCard('Private', '🔒', sections.private, [
+                            { label: 'SSN', value: fields.private.ssn, masked: true },
+                            { label: 'Insurance', value: fields.private.insurance, missing: true, section: 'private', field: 'insurance' },
+                            { label: 'Notes', value: fields.private.medicalNotes }
+                        ], null, 'private')}
+
+                        ${renderSectionCard('Electronic Health Records', '🏥', sections.vault, [
+                            { label: 'Records', value: fields.vault.records + ' documents' }
+                        ], 'showHealthRecordsTab()', 'vault')}
+                        <div class="emergency-card">
+                            <h3>🚨 Emergency Services</h3>
+                            <p style="margin-bottom:8px;">Double-click to open</p>
+                            <button class="access-911" ondblclick="confirmEmergencyAccess()" title="Double-click to activate">
+                                Access Emergency Services
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <button onclick="editSection('emergency')" class="action-btn primary">
+                            <span>Add Missing Info</span>
+                            <span class="badge">+${totalFields - filledFields}</span>
+                        </button>
+                        <button onclick="downloadQRFixed()" class="action-btn">Download QR</button>
+                        <button onclick="shareQR()" class="action-btn">Share</button>
+                    </div>
+                </div>
+            `;
+
+            localStorage.setItem('ikey_last_view', 'dashboard');
+            localStorage.setItem('ikey_current_guid', currentGUID);
+
+            startSessionTimer();
+        }
+
+        function renderSectionCard(title, icon, progress, fields, onClick, sectionKey) {
+            const percent = Math.round((progress.filled / progress.total) * 100);
+            const clickAttr = onClick ?  onclick="${onClick}" style="cursor:pointer" : '';
+            return 
+                <div class="section-card ${percent === 100 ? 'complete' : ''}"${clickAttr}>
+                    <div class="section-header">
+                        <span class="section-icon">${icon}</span>
+                        <h3>${title}</h3>
+                        <div class="mini-progress">
+                            <div class="progress-bar" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+                    <div class="section-fields">
+                        ${fields.map(f => 
+                            <div class="field-row ${f.missing ? 'missing' : ''}">
+                                <span class="field-label">${f.label}</span>
+                                <span class="field-value">
+                                    ${f.missing ? <span class="add-button" onclick="addFieldModal('${f.section}','${f.field}')">+ Add</span> :
+                                     (f.masked ? '••••' : (f.value || '—'))}
+                                </span>
+                            </div>
+                        ).join('')}
+                    </div>
+                    <button class="edit-section-btn" onclick="event.stopPropagation(); openEditModal('${sectionKey}')">Edit</button>
+                </div>
+            ;
+        }
+
+        function openEditModal(section) {
+            const titles = {
+                basic: 'Basic Info',
+                emergency: 'Emergency',
+                contacts: 'Contacts',
+                private: 'Private',
+                vault: 'Electronic Health Records'
+            };
+            const modal = document.createElement('div');
+            modal.className = 'field-modal active';
+            modal.innerHTML = 
+                <div class="modal-backdrop" onclick="closeModal()"></div>
+                <div class="modal-content">
+                    <h3>Edit ${titles[section] || ''}</h3>
+                    ${getSectionInputs(section)}
+                    <div class="modal-actions">
+                        <button onclick="saveSection('${section}')" class="btn-primary">Save</button>
+                        <button onclick="closeModal()" class="btn-ghost">Cancel</button>
+                    </div>
+                </div>
+            ;
+            document.body.appendChild(modal);
+            const firstInput = modal.querySelector('input, textarea, select');
+            if (firstInput) firstInput.focus();
+        }
+
+        function getSectionInputs(section) {
+            switch (section) {
+                case 'basic':
+                    return 
+                        <input id="edit-name" type="text" placeholder="Name" value="${currentBlob?.name || ''}">
+                        <input id="edit-pronouns" type="text" placeholder="Pronouns" value="${currentBlob?.pronouns || ''}">
+                        <textarea id="edit-critical" placeholder="Critical Info">${currentBlob?.criticalInfo || ''}</textarea>;
+                case 'emergency':
+                    const bt = currentBlob?.publicInfo?.bloodType || '';
+                    return 
+                        <select id="edit-blood">
+                            <option value="">Blood Type</option>
+                            ${['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(o => <option value="${o}" ${bt===o?'selected':''}>${o}</option>).join('')}
+                        </select>
+                        <textarea id="edit-allergies" placeholder="Allergies">${currentBlob?.publicInfo?.allergies || ''}</textarea>
+                        <textarea id="edit-medications" placeholder="Medications">${currentBlob?.publicInfo?.medications || ''}</textarea>;
+                case 'contacts':
+                    return 
+                        <input id="edit-primary-name" type="text" placeholder="Primary Name" value="${currentBlob?.publicInfo?.contact?.name || ''}">
+                        <input id="edit-primary-phone" type="tel" placeholder="Primary Phone" value="${currentBlob?.publicInfo?.contact?.phone || ''}">
+                        <input id="edit-secondary-name" type="text" placeholder="Secondary Name" value="${currentBlob?.publicInfo?.secondaryContact?.name || ''}">
+                        <input id="edit-secondary-phone" type="tel" placeholder="Secondary Phone" value="${currentBlob?.publicInfo?.secondaryContact?.phone || ''}">;
+                case 'private':
+                    return 
+                        <input id="edit-ssn" type="text" placeholder="SSN" value="${currentBlob?.privateInfo?.ssn || ''}">
+                        <input id="edit-insurance-provider" type="text" placeholder="Insurance Provider" value="${currentBlob?.privateInfo?.insurance?.provider || ''}">
+                        <input id="edit-insurance-policy" type="text" placeholder="Policy #" value="${currentBlob?.privateInfo?.insurance?.policy || ''}">
+                        <textarea id="edit-notes" placeholder="Notes">${currentBlob?.privateInfo?.notes || ''}</textarea>;
+                default:
+                    return <p>No editable fields.</p>;
+            }
+        }
+
+        function saveSection(section) {
+            if (!currentBlob) currentBlob = {};
+            switch (section) {
+                case 'basic':
+                    currentBlob.name = document.getElementById('edit-name').value.trim();
+                    currentBlob.pronouns = document.getElementById('edit-pronouns').value.trim();
+                    currentBlob.criticalInfo = document.getElementById('edit-critical').value.trim();
+                    break;
+                case 'emergency':
+                    currentBlob.publicInfo = currentBlob.publicInfo || {};
+                    currentBlob.publicInfo.bloodType = document.getElementById('edit-blood').value;
+                    currentBlob.publicInfo.allergies = document.getElementById('edit-allergies').value.trim();
+                    currentBlob.publicInfo.medications = document.getElementById('edit-medications').value.trim();
+                    break;
+                case 'contacts':
+                    currentBlob.publicInfo = currentBlob.publicInfo || {};
+                    currentBlob.publicInfo.contact = {
+                        name: document.getElementById('edit-primary-name').value.trim(),
+                        phone: document.getElementById('edit-primary-phone').value.trim()
+                    };
+                    currentBlob.publicInfo.secondaryContact = {
+                        name: document.getElementById('edit-secondary-name').value.trim(),
+                        phone: document.getElementById('edit-secondary-phone').value.trim()
+                    };
+                    break;
+                case 'private':
+                    currentBlob.privateInfo = currentBlob.privateInfo || {};
+                    currentBlob.privateInfo.ssn = document.getElementById('edit-ssn').value.trim();
+                    const provider = document.getElementById('edit-insurance-provider').value.trim();
+                    const policy = document.getElementById('edit-insurance-policy').value.trim();
+                    currentBlob.privateInfo.insurance = provider || policy ? { provider, policy } : undefined;
+                    currentBlob.privateInfo.notes = document.getElementById('edit-notes').value.trim();
+                    break;
+                default:
+                    break;
+            }
+            closeModal();
+            showOwnerDashboard();
+        }
+
+        function addFieldModal(section, field) {
+            const modal = document.createElement('div');
+            modal.className = 'field-modal active';
+            modal.innerHTML = 
+                <div class="modal-backdrop" onclick="closeModal()"></div>
+                <div class="modal-content">
+                    <h3>Add ${field}</h3>
+                    ${getFieldInput(section, field)}
+                    <div class="modal-actions">
+                        <button onclick="saveField('${section}', '${field}')" class="btn-primary">Save</button>
+                        <button onclick="closeModal()" class="btn-ghost">Cancel</button>
+                    </div>
+                </div>
+            ;
+            document.body.appendChild(modal);
+            const firstInput = modal.querySelector('input, textarea, select');
+            if (firstInput) firstInput.focus();
+        }
+
+        function getFieldInput(section, field) {
+            const configs = {
+                'emergency.medications': '<textarea id="field-input" placeholder="List current medications, dosages, and frequency"></textarea>',
+                'emergency.bloodType': '<select id="field-input"><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select>',
+                'contacts.secondary': '<input id="field-input" type="text" placeholder="Name"><input id="field-input2" type="tel" placeholder="Phone">',
+                'private.insurance': '<input id="field-input" type="text" placeholder="Provider"><input id="field-input2" type="text" placeholder="Policy #">'
+            };
+            return configs[${section}.${field}] || '<input id="field-input" type="text">';
+        }
+
+        function closeModal() {
+            const modal = document.querySelector('.field-modal');
+            if (modal) modal.remove();
+        }
+
+        function saveField(section, field) {
+            const input = document.querySelector('.field-modal #field-input');
+            const input2 = document.querySelector('.field-modal #field-input2');
+            const value = input ? input.value.trim() : '';
+            const value2 = input2 ? input2.value.trim() : '';
+
+            if (!currentBlob) currentBlob = {};
+            if (section === 'emergency') {
+                currentBlob.publicInfo = currentBlob.publicInfo || {};
+                currentBlob.publicInfo[field] = value;
+            } else if (section === 'contacts' && field === 'secondary') {
+                currentBlob.publicInfo = currentBlob.publicInfo || {};
+                currentBlob.publicInfo.secondaryContact = { name: value, phone: value2 };
+            } else if (section === 'private') {
+                currentBlob.privateInfo = currentBlob.privateInfo || {};
+                currentBlob.privateInfo[field] = value2 ? { provider: value, policy: value2 } : value;
+            }
+            closeModal();
+            showOwnerDashboard();
+        }
+
+        async function showUpdateForm(password) {
+            try {
+                const verified = await verifyOwnerPassword(password);
+                if (!verified) return false;
+
+                showCreationForm();
+
+                const form = document.getElementById('create-form');
+
+                const publicInfo = currentBlob.publicInfo || {};
+
+                document.getElementById('name').value = currentBlob.name || '';
+                document.getElementById('pronouns').value = currentBlob.pronouns || '';
+                document.getElementById('critical-info').value = currentBlob.criticalInfo || '';
+                if (publicInfo.bloodType) {
+                    const bt = document.querySelector(input[name="blood-type"][value="${publicInfo.bloodType}"]);
+                    if (bt) bt.checked = true;
+                }
+                document.getElementById('allergies').value = publicInfo.allergies || '';
+                document.getElementById('medications').value = publicInfo.medications || '';
+                document.getElementById('contact-name').value = publicInfo.contact?.name || '';
+                document.getElementById('contact-phone').value = publicInfo.contact?.phone || '';
+                document.getElementById('contact-relationship').value = publicInfo.contact?.relationship || '';
+                if (publicInfo.secondaryContact) {
+                    document.getElementById('add-secondary-contact').click();
+                    document.getElementById('secondary-contact-name').value = publicInfo.secondaryContact.name || '';
+                    document.getElementById('secondary-contact-phone').value = publicInfo.secondaryContact.phone || '';
+                    document.getElementById('secondary-contact-relationship').value = publicInfo.secondaryContact.relationship || '';
+                }
+
+                document.getElementById('password').parentElement.style.display = 'none';
+                document.getElementById('password').required = false;
+                document.getElementById('password-confirm').parentElement.style.display = 'none';
+                document.getElementById('password-confirm').required = false;
+                document.getElementById('password-req').style.display = 'none';
+
+                const preview = document.createElement('div');
+                preview.id = 'update-preview';
+                preview.className = 'info-section';
+                form.appendChild(preview);
+                function updatePreview() {
+                    preview.innerHTML = 
+                        <div class="info-item"><div class="info-label">Blood Type</div><div class="info-value">${document.querySelector('input[name="blood-type"]:checked')?.value || ''}</div></div>
+                        <div class="info-item"><div class="info-label">Allergies</div><div class="info-value">${document.getElementById('allergies').value}</div></div>
+                        <div class="info-item"><div class="info-label">Medications</div><div class="info-value">${document.getElementById('medications').value}</div></div>
+                        <div class="info-item"><div class="info-label">Contacts</div><div class="info-value">${document.getElementById('contact-name').value} ${document.getElementById('contact-phone').value}${document.getElementById('secondary-contact-name').value ? '<br>' + document.getElementById('secondary-contact-name').value + ' ' + document.getElementById('secondary-contact-phone').value : ''}</div></div>
+                    ;
+                }
+                ['allergies','medications','contact-name','contact-phone','secondary-contact-name','secondary-contact-phone'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener('input', updatePreview);
+                });
+                document.querySelectorAll('input[name="blood-type"]').forEach(r => r.addEventListener('change', updatePreview));
+                updatePreview();
+
+                if (currentBlob.privateInfo) {
+                    const privateInfo = currentBlob.privateInfo;
+                    document.getElementById('ssn').value = privateInfo.ssn || '';
+                    document.getElementById('medical-notes').value = privateInfo.notes || '';
+                }
+
+                document.getElementById('create-form').removeEventListener('submit', handleCreateForm);
+                document.getElementById('create-form').addEventListener('submit', (e) => handleUpdateForm(e, password));
+
+                document.querySelector('#create-form button[type="submit"]').innerHTML = '<span>Save Emergency Info</span>';
+                startSessionTimer();
+                return true;
+
+            } catch (error) {
+                console.error('Archive error:', error);
+                alert('Failed to prepare archive: ' + error.message);
+                if (currentBlob) {
+                    displayFullInfo(currentBlob);
+                }
+                return false;
+            }
+        }
+
+        async function handleUpdateForm(e, password) {
+            e.preventDefault();
+
+            const button = e.target.querySelector('button[type="submit"]');
+            button.disabled = true;
+            button.innerHTML = '<span>Saving...</span>';
+
+            try {
+                // Collect updated form data
+                const name = document.getElementById('name').value;
+                const pronouns = document.getElementById('pronouns').value;
+                const criticalInfo = document.getElementById('critical-info').value;
+                const bloodType = document.querySelector('input[name="blood-type"]:checked')?.value || '';
+                const contactRelationship = document.getElementById('contact-relationship').value;
+                const secondaryName = document.getElementById('secondary-contact-name').value;
+                const secondaryPhone = document.getElementById('secondary-contact-phone').value;
+                const secondaryRel = document.getElementById('secondary-contact-relationship').value;
+                const publicInfo = {
+                    bloodType,
+                    allergies: document.getElementById('allergies').value,
+                    medications: document.getElementById('medications').value,
+                    contact: {
+                        name: document.getElementById('contact-name').value,
+                        phone: document.getElementById('contact-phone').value,
+                        relationship: contactRelationship
+                    }
+                };
+                if (secondaryName || secondaryPhone) {
+                    publicInfo.secondaryContact = {
+                        name: secondaryName,
+                        phone: secondaryPhone,
+                        relationship: secondaryRel
+                    };
+                }
+
+                const privateInfo = password ? {
+                    ssn: document.getElementById('ssn').value,
+                    notes: document.getElementById('medical-notes').value,
+                    encryptedWith: await sha256Hash(currentKey + password)
+                } : null;
+
+                const payload = { name, pronouns, criticalInfo, publicInfo, privateInfo };
+                const encryptedBlob = await encrypt(JSON.stringify(payload), currentKey);
+
+                const archivePayload = {
+                    encrypted: true,
+                    version: "3.0",
+                    data: encryptedBlob
+                };
+
+                const response = await fetch(WEBHOOKURL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-archive-meta-subject': 'Emergency Contacts',
+                        'x-archive-meta-description': 'Encrypted emergency contact information',
+                        'x-archive-meta-guid': currentGUID,
+                        'x-archive-meta-identifier': `ikey${currentGUID}`,
+                        'x-archive-meta-mediatype': 'data',
+                        'x-archive-meta-updated': new Date().toISOString()
+                    },
+                    body: JSON.stringify(archivePayload)
+                });
+
+                if (response.status === 403) {
+                    throw new Error('Invalid password - archive denied');
+                }
+                if (!response.ok) {
+                    throw new Error('Archive failed');
+                }
+
+                currentData = archivePayload;
+                currentBlob = { ...currentBlob, name, pronouns, criticalInfo, publicInfo, privateInfo, metadata: { ...(currentBlob.metadata || {}), updated: new Date().toISOString() } };
+                showStatus('✅ Data archived!', 'success');
+                showOwnerDashboard();
+
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<span>Save Emergency Info</span>';
+            }
+        }
+
+        // Show creation form
+        function showCreationForm() {
+            currentMode = 'create';
+            const container = document.getElementById('main-content');
+
+            container.innerHTML = `
+                <div class="header">
+                    <h1 data-i18n="createYourKey">Create Your iKey</h1>
+                    <p data-i18n="tagline">Your data. Your key. Your control.</p>
+                </div>
+
+                <div class="content">
+                      <form id="create-form">
+                          <div class="section-title" data-i18n="emergencyInfo">Personal Information <span class="section-status incomplete" id="personal-status">Incomplete</span></div>
+
+                          <div class="form-group">
+                              <label for="name"><span data-i18n="name">Name</span> *</label>
+                              <input type="text" id="name" required placeholder="John Doe" data-i18n-placeholder="contactNamePlaceholder">
+                          </div>
+
+                          <div class="form-group">
+                              <label for="pronouns"><span data-i18n="pronouns">Pronouns</span></label>
+                              <input type="text" id="pronouns" placeholder="e.g., she/her">
+                          </div>
+
+                          <div class="form-group">
+                              <label for="critical-info"><span data-i18n="criticalInfo">Critical Information</span> (<span data-i18n="optional">Optional</span>)</label>
+                              <textarea
+                                  id="critical-info"
+                                  maxlength="100"
+                                  rows="2"
+                                  data-i18n-placeholder="criticalInfoPlaceholder"
+                                  placeholder="e.g., Severe penicillin allergy, Type 1 diabetic"
+                              ></textarea>
+                              <div class="field-info">
+                                  <span class="char-counter">0/100</span>
+                                  <span class="info-note" data-i18n="criticalInfoNote">• Embedded in QR • Always visible</span>
+                              </div>
+                          </div>
+
+                          <div class="form-group">
+                              <label data-i18n="bloodType">Blood Type (Optional)</label>
+                              <div class="blood-type-grid" id="blood-type">
+                                  <label class="blood-type-btn"><input type="radio" name="blood-type" value="A+"><span>A+</span></label>
+                                  <label class="blood-type-btn"><input type="radio" name="blood-type" value="B+"><span>B+</span></label>
+                                  <label class="blood-type-btn"><input type="radio" name="blood-type" value="AB+"><span>AB+</span></label>
+                                  <label class="blood-type-btn"><input type="radio" name="blood-type" value="O+"><span>O+</span></label>
+                                  <label class="blood-type-btn"><input type="radio" name="blood-type" value="A-"><span>A-</span></label>
+                                  <label class="blood-type-btn"><input type="radio" name="blood-type" value="B-"><span>B-</span></label>
+                                  <label class="blood-type-btn"><input type="radio" name="blood-type" value="AB-"><span>AB-</span></label>
+                                  <label class="blood-type-btn"><input type="radio" name="blood-type" value="O-"><span>O-</span></label>
+                              </div>
+                              <button type="button" class="unknown-option" id="blood-type-unknown">I don't know my blood type</button>
+                          </div>
+
+                          <div class="form-group">
+                              <label for="allergies" data-i18n="allergies">Allergies</label>
+                              <textarea id="allergies" placeholder="Penicillin, peanuts, etc." data-i18n-placeholder="allergiesPlaceholder"></textarea>
+                          </div>
+
+                          <div class="form-group">
+                              <label><span data-i18n="medications">Medications</span></label>
+                              <div class="medication-search" style="position:relative;">
+                                  <input type="text" id="medication-search" placeholder="Start typing medication name...">
+                                  <div id="medication-results" class="search-dropdown"></div>
+                              </div>
+                              <div id="selected-medications" class="medication-list"></div>
+                              <textarea id="medications" placeholder="Current medications" style="display:none;"></textarea>
+                              <div id="allergy-warnings" class="allergy-warnings"></div>
+                          </div>
+
+                          <div class="form-group">
+                              <label for="contact-name"><span data-i18n="emergencyContactName">Primary Contact Name</span> *</label>
+                              <input type="text" id="contact-name" required placeholder="e.g., Jane Doe" data-i18n-placeholder="contactNamePlaceholder">
+                          </div>
+
+                          <div class="form-group">
+                              <label for="contact-phone"><span data-i18n="emergencyContactPhone">Primary Contact Phone</span> *</label>
+                              <input type="tel" id="contact-phone" required placeholder="(555) 123-4567" data-i18n-placeholder="contactPhonePlaceholder">
+                          </div>
+
+                          <div class="form-group">
+                              <label for="contact-relationship">Relationship</label>
+                              <select id="contact-relationship">
+                                  <option value="">Select relationship</option>
+                                  <option>Spouse</option>
+                                  <option>Parent</option>
+                                  <option>Sibling</option>
+                                  <option>Child</option>
+                                  <option>Friend</option>
+                                  <option>Other</option>
+                              </select>
+                          </div>
+
+                          <button type="button" id="add-secondary-contact" class="btn-secondary">+ Add Secondary Contact</button>
+
+                          <div id="secondary-contact" style="display:none;">
+                              <div class="form-group">
+                                  <label for="secondary-contact-name">Secondary Contact Name</label>
+                                  <input type="text" id="secondary-contact-name" placeholder="e.g., John Doe">
+                              </div>
+                              <div class="form-group">
+                                  <label for="secondary-contact-phone">Secondary Contact Phone</label>
+                                  <input type="tel" id="secondary-contact-phone" placeholder="(555) 987-6543">
+                              </div>
+                              <div class="form-group">
+                                  <label for="secondary-contact-relationship">Relationship</label>
+                                  <select id="secondary-contact-relationship">
+                                      <option value="">Select relationship</option>
+                                      <option>Spouse</option>
+                                      <option>Parent</option>
+                                      <option>Sibling</option>
+                                      <option>Child</option>
+                                      <option>Friend</option>
+                                      <option>Other</option>
+                                  </select>
+                              </div>
+                          </div>
+
+                          <div class="section-title" data-i18n="passwordProtected">Password Protected <span class="section-status incomplete" id="password-status">Incomplete</span></div>
+
+                          <div class="form-group">
+                              <label for="ssn"><span data-i18n="ssn">Social Security Number</span></label>
+                              <input type="text" id="ssn" placeholder="XXX-XX-XXXX" data-i18n-placeholder="ssnPlaceholder">
+                          </div>
+
+                          <div class="form-group">
+                              <label for="medical-notes"><span data-i18n="medicalNotes">Medical Notes</span></label>
+                              <textarea id="medical-notes" placeholder="Medications, conditions, etc." data-i18n-placeholder="medicalNotesPlaceholder"></textarea>
+                          </div>
+
+                        <div class="form-group">
+                            <label for="password"><span data-i18n="password">Password</span> *</label>
+                            <input type="password" id="password" required placeholder="Choose a password" data-i18n-placeholder="choosePassword">
+                            <div id="password-strength" class="hint"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password-confirm"><span data-i18n="confirmPassword">Confirm Password</span> *</label>
+                            <input type="password" id="password-confirm" required placeholder="Re-enter password" data-i18n-placeholder="reenterPassword">
+                        </div>
+
+                        <div class="hint" id="password-req" data-i18n="passwordRequirements">
+                            A strong password is required to create your code. It must be at least 8 characters and include upper and lower case letters, a number, and a special character. Without it you cannot save changes or modify protected content.
+                        </div>
+
+                        <div class="hint" data-i18n="passwordWarning">
+                            Store this password somewhere safe. If you lose it, you'll need to create a new code and any password-protected data will be lost forever.
+                        </div>
+
+                        <button type="submit" class="btn">
+                            <span data-i18n="createKey">Create iKey</span>
+                        </button>
+                    </form>
+
+                    <div id="qr-result" style="display: none;">
+                        <div class="qr-display">
+                            <h3>✅ Your iKey Created</h3>
+                            <p style="color: #666; font-size: 0.875rem; margin: 10px 0;">
+                                ✓ Encrypted with zero-knowledge security<br>
+                                ✓ Backed up to Archive.org<br>
+                                ✓ Only this QR can decrypt your data
+                            </p>
+                            <div id="qrcode"></div>
+                            <div class="action-buttons">
+                                <button class="btn" onclick="downloadQRFixed()">💾 <span data-i18n="download">Download</span></button>
+                                <button class="btn" onclick="testQR()">🔍 <span data-i18n="test">Test</span></button>
+                            </div>
+                            <div class="status-message status-info" style="margin-top: 15px;">
+                                <strong>Important:</strong> Save this QR code! It contains the only key to your data.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="status-message"></div>
+
+                    <div class="help-link">
+                        <a href="#" onclick="toggleHelp(); return false;">How It Works</a>
+                        <div id="help-content" class="help-content"></div>
+                    </div>
+                </div>
+            `;
+
+            setLanguage(currentLanguage);
+
+            // Add form submit handler
+            document.getElementById('create-form').addEventListener('submit', handleCreateForm);
+
+            initMedicationField();
+            initContactSection();
+            initBloodTypeSelector();
+            initSectionStatus();
+
+            // Password strength meter
+            document.getElementById('password').addEventListener('input', () => {
+                const pwd = document.getElementById('password').value;
+                const strengthEl = document.getElementById('password-strength');
+                strengthEl.textContent = `Strength: ${getPasswordStrength(pwd)}`;
+            });
+
+            // Critical info character counter
+            const ci = document.getElementById('critical-info');
+            const counter = ci.parentElement.querySelector('.char-counter');
+            ci.addEventListener('input', () => {
+                counter.textContent = `${ci.value.length}/100`;
+            });
+        }
+
+        // Handle form submission
+        async function handleCreateForm(e) {
+            e.preventDefault();
+
+            const button = e.target.querySelector('button[type="submit"]');
+            button.disabled = true;
+            button.innerHTML = '<span>Creating & Securing...</span>';
+
+            try {
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('password-confirm').value;
+
+                if (!password) {
+                    throw new Error('Password is required');
+                }
+                if (!isStrongPassword(password)) {
+                    throw new Error('Password does not meet requirements');
+                }
+                if (password !== confirmPassword) {
+                    throw new Error('Passwords do not match');
+                }
+
+                alert('Store this password somewhere safe. Without it, you cannot archive new data or modify the protected content.');
+
+                // Generate identifiers and keys
+                currentGUID = generateGUID();
+                currentKey = generateKey();
+                const created = new Date().toISOString();
+
+                // Collect form data
+                const formData = {
+                    name: document.getElementById('name').value,
+                    pronouns: document.getElementById('pronouns').value,
+                    criticalInfo: document.getElementById('critical-info').value,
+                    bloodType: document.querySelector('input[name="blood-type"]:checked')?.value || '',
+                    allergies: document.getElementById('allergies').value,
+                    medications: document.getElementById('medications').value,
+                    contactName: document.getElementById('contact-name').value,
+                    contactPhone: document.getElementById('contact-phone').value,
+                    contactRelationship: document.getElementById('contact-relationship').value,
+                    secondaryName: document.getElementById('secondary-contact-name').value,
+                    secondaryPhone: document.getElementById('secondary-contact-phone').value,
+                    secondaryRelationship: document.getElementById('secondary-contact-relationship').value,
+                    ssn: document.getElementById('ssn').value,
+                    notes: document.getElementById('medical-notes').value,
+                    passwordHint: document.getElementById('password-hint')?.value || ''
+                };
+
+                // Prepare encrypted data
+                const publicInfo = {
+                    bloodType: formData.bloodType,
+                    allergies: formData.allergies,
+                    medications: formData.medications,
+                    contact: { name: formData.contactName, phone: formData.contactPhone, relationship: formData.contactRelationship }
+                };
+                if (formData.secondaryName || formData.secondaryPhone) {
+                    publicInfo.secondaryContact = {
+                        name: formData.secondaryName,
+                        phone: formData.secondaryPhone,
+                        relationship: formData.secondaryRelationship
+                    };
+                }
+
+                const privateInfo = password ? {
+                    ssn: formData.ssn,
+                    notes: formData.notes,
+                    encryptedWith: await sha256Hash(currentKey + password)
+                } : null;
+
+                const payload = {
+                    name: formData.name,
+                    pronouns: formData.pronouns,
+                    criticalInfo: formData.criticalInfo,
+                    publicInfo,
+                    privateInfo,
+                    passwordHint: formData.passwordHint,
+                    vault: window.healthApp.exportVault()
+                };
+                const encryptedData = await encrypt(JSON.stringify(payload), currentKey);
+
+                const archivePayload = {
+                    encrypted: true,
+                    version: "3.0",
+                    data: encryptedData
+                };
+
+                currentData = archivePayload;
+
+                // IMMEDIATELY upload to server
+                showStatus('⏳ Securing your data online...', 'info');
+
+                const response = await fetch(WEBHOOKURL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-archive-meta-subject': 'Emergency Contacts',
+                        'x-archive-meta-description': 'Encrypted emergency contact information',
+                        'x-archive-meta-guid': currentGUID,
+                        'x-archive-meta-identifier': `ikey${currentGUID},
+                        'x-archive-meta-title': ikeyemergency${currentGUID}.json`,
+                        'x-archive-meta-mediatype': 'data'
+                    },
+                    body: JSON.stringify(archivePayload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to secure data online');
+                }
+
+                // Only generate QR after successful upload
+                const embedded = btoa(
+                    JSON.stringify({
+                        n: formData.name,
+                        b: formData.bloodType,
+                        a: formData.allergies?.substring(0, 2000), // limit embedded allergies to 2000 chars
+                        t: created
+                    })
+                );
+
+                const qrUrl = ${VIEWER_URL}#v2:${currentGUID}:${currentKey}:${embedded};
+                window.location.hash = v2:${currentGUID}:${currentKey}:${embedded};
+
+                // Generate QR code
+                const qrContainer = document.getElementById('qrcode');
+                qrContainer.innerHTML = '';
+                new QRCode(qrContainer, {
+                    text: qrUrl,
+                    width: 256,
+                    height: 256,
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+
+                window.currentQRUrl = qrUrl;
+
+                currentBlob = {
+                    version: 'v2',
+                    created,
+                    name: formData.name,
+                    pronouns: formData.pronouns,
+                    criticalInfo: formData.criticalInfo,
+                    publicInfo,
+                    privateInfo,
+                    vault: window.healthApp.exportVault()
+                };
+
+                // Show success
+                document.getElementById('create-form').style.display = 'none';
+                document.getElementById('qr-result').style.display = 'block';
+                showStatus('iKey created and secured online!', 'success');
+
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+                // Don't create QR if upload failed
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<span data-i18n="createKey">Create iKey</span>';
+                setLanguage(currentLanguage);
+            }
+        }
+
+        // Utility functions
+        function generateGUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function generateKey(length = 32) {
+            const array = new Uint8Array(length);
+            crypto.getRandomValues(array);
+            return btoa(String.fromCharCode.apply(null, array))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=/g, '');
+        }
+
+        function getPasswordStrength(pwd) {
+            let score = 0;
+            if (pwd.length >= 8) score++;
+            if (/[a-z]/.test(pwd)) score++;
+            if (/[A-Z]/.test(pwd)) score++;
+            if (/\d/.test(pwd)) score++;
+            if (/[^A-Za-z0-9]/.test(pwd)) score++;
+            if (pwd.length >= 12) score++;
+            if (score >= 5) return 'Strong';
+            if (score >= 3) return 'Medium';
+            return 'Weak';
+        }
+
+        function isStrongPassword(pwd) {
+            return /^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[^A-Za-z0-9]).{8,}$/.test(pwd);
+        }
+
+        function initContactSection() {
+            const btn = document.getElementById('add-secondary-contact');
+            const section = document.getElementById('secondary-contact');
+            if (btn && section) {
+                btn.addEventListener('click', () => {
+                    section.style.display = section.style.display === 'none' ? 'block' : 'none';
+                });
+            }
+            const primaryName = document.getElementById('contact-name');
+            const primaryPhone = document.getElementById('contact-phone');
+            if (primaryName) {
+                primaryName.value = '';
+                primaryName.placeholder = 'e.g., Jane Doe';
+            }
+            if (primaryPhone) {
+                primaryPhone.value = '';
+                primaryPhone.placeholder = '(555) 123-4567';
+            }
+        }
+
+        function initBloodTypeSelector() {
+            const buttons = document.querySelectorAll('.blood-type-btn');
+            const unknown = document.getElementById('blood-type-unknown');
+            if (!buttons.length || !unknown) return;
+
+            buttons.forEach(btn => {
+                const input = btn.querySelector('input');
+                btn.addEventListener('click', () => {
+                    buttons.forEach(b => b.classList.remove('selected'));
+                    unknown.classList.remove('selected');
+                    if (input) input.checked = true;
+                    btn.classList.add('selected');
+                });
+            });
+
+            unknown.addEventListener('click', () => {
+                buttons.forEach(b => {
+                    const inp = b.querySelector('input');
+                    if (inp) inp.checked = false;
+                    b.classList.remove('selected');
+                });
+                unknown.classList.add('selected');
+            });
+        }
+
+        function initSectionStatus() {
+            const personalStatus = document.getElementById('personal-status');
+            const passwordStatus = document.getElementById('password-status');
+
+            function updatePersonal() {
+                const name = document.getElementById('name')?.value.trim();
+                const cName = document.getElementById('contact-name')?.value.trim();
+                const cPhone = document.getElementById('contact-phone')?.value.trim();
+                if (name && cName && cPhone) {
+                    personalStatus.textContent = 'Complete';
+                    personalStatus.classList.add('complete');
+                    personalStatus.classList.remove('incomplete');
+                } else {
+                    personalStatus.textContent = 'Incomplete';
+                    personalStatus.classList.add('incomplete');
+                    personalStatus.classList.remove('complete');
+                }
+            }
+
+            function updatePassword() {
+                const pwd = document.getElementById('password')?.value;
+                const pwd2 = document.getElementById('password-confirm')?.value;
+                if (pwd && pwd === pwd2 && isStrongPassword(pwd)) {
+                    passwordStatus.textContent = 'Complete';
+                    passwordStatus.classList.add('complete');
+                    passwordStatus.classList.remove('incomplete');
+                } else {
+                    passwordStatus.textContent = 'Incomplete';
+                    passwordStatus.classList.add('incomplete');
+                    passwordStatus.classList.remove('complete');
+                }
+            }
+
+            ['name', 'contact-name', 'contact-phone'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', updatePersonal);
+            });
+            ['password', 'password-confirm'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', updatePassword);
+            });
+
+            updatePersonal();
+            updatePassword();
+        }
+
+        async function encrypt(text, password) {
+            const enc = new TextEncoder();
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+
+            const passwordKey = await crypto.subtle.importKey(
+                "raw",
+                enc.encode(password),
+                "PBKDF2",
+                false,
+                ["deriveBits", "deriveKey"]
+            );
+
+            const aesKey = await crypto.subtle.deriveKey(
+                {
+                    name: "PBKDF2",
+                    salt: salt,
+                    iterations: 100000,
+                    hash: "SHA-256"
+                },
+                passwordKey,
+                { 
+                    name: "AES-GCM",
+                    length: 256
+                },
+                false,
+                ["encrypt"]
+            );
+
+            const encrypted = await crypto.subtle.encrypt(
+                { 
+                    name: "AES-GCM",
+                    iv: iv,
+                    tagLength: 128
+                },
+                aesKey,
+                enc.encode(text)
+            );
+
+            const encryptedContent = new Uint8Array(encrypted);
+            const buf = new Uint8Array(salt.byteLength + iv.byteLength + encryptedContent.byteLength);
+            buf.set(salt, 0);
+            buf.set(iv, salt.byteLength);
+            buf.set(encryptedContent, salt.byteLength + iv.byteLength);
+
+            return btoa(String.fromCharCode(...buf));
+        }
+
+        async function decrypt(encryptedData, password) {
+            const enc = new TextEncoder();
+            const dec = new TextDecoder();
+
+            const data = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
+            const salt = data.slice(0, 16);
+            const iv = data.slice(16, 28);
+            const encrypted = data.slice(28);
+
+            const passwordKey = await crypto.subtle.importKey(
+                "raw",
+                enc.encode(password),
+                "PBKDF2",
+                false,
+                ["deriveBits", "deriveKey"]
+            );
+
+            const aesKey = await crypto.subtle.deriveKey(
+                {
+                    name: "PBKDF2",
+                    salt: salt,
+                    iterations: 100000,
+                    hash: "SHA-256"
+                },
+                passwordKey,
+                { 
+                    name: "AES-GCM",
+                    length: 256
+                },
+                false,
+                ["decrypt"]
+            );
+
+            const decrypted = await crypto.subtle.decrypt(
+                { 
+                    name: "AES-GCM",
+                    iv: iv,
+                    tagLength: 128
+                },
+                aesKey,
+                encrypted
+            );
+
+            return dec.decode(decrypted);
+        }
+
+        async function generateUpdateToken(password, guid) {
+            // Deterministic token from password + guid
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password + guid + "UPDATE_SALTV1");
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return btoa(String.fromCharCode(...new Uint8Array(hashBuffer)))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '')
+                .replace(/=/g, '');
+        }
+
+        async function sha256Hash(text) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function createDemoData(guid, key) {
+            const fullData = {
+                version: "2.0",
+                created: new Date().toISOString(),
+                beacon: BEACON_TEXT,
+                publicInfo: {
+                    name: "Demo User",
+                    bloodType: "O+",
+                    allergies: "Penicillin, Peanuts",
+                    contact: {
+                        name: "Primary Contact",
+                        phone: "(555) 123-4567"
+                    }
+                },
+                privateInfo: {
+                    ssn: "XXX-XX-XXXX",
+                    notes: "This is demo data. Password is: demo",
+                    encryptedWith: await sha256Hash(key + "demo")
+                }
+            };
+
+            const encryptedBlob = await encrypt(JSON.stringify(fullData), key);
+            return {
+                encrypted: true,
+                version: "3.0",
+                data: encryptedBlob
+            };
+        }
+
+        function downloadQRFixed() {
+            const canvas = document.querySelector('#qrcode canvas, #owner-qr canvas');
+            if (!canvas) {
+                const tempDiv = document.createElement('div');
+                new QRCode(tempDiv, {
+                    text: window.currentQRUrl || ${VIEWER_URL}#v2:${currentGUID}:${currentKey}:${btoa(JSON.stringify({
+                        n: currentBlob.name,
+                        b: currentBlob.publicInfo?.bloodType,
+                        a: currentBlob.publicInfo?.allergies,
+                        t: currentBlob.created
+                    }))},
+                    width: 256,
+                    height: 256
+                });
+                setTimeout(() => {
+                    const newCanvas = tempDiv.querySelector('canvas');
+                    if (newCanvas) {
+                        const link = document.createElement('a');
+                        link.download = ikey-${currentBlob.name || 'emergency'}.png;
+                        link.href = newCanvas.toDataURL();
+                        link.click();
+                    }
+                }, 100);
+            } else {
+                const link = document.createElement('a');
+                link.download = ikey-${currentBlob.name || 'emergency'}.png;
+                link.href = canvas.toDataURL();
+                link.click();
+            }
+        }
+
+        function shareQR() {
+            const url = window.currentQRUrl || ${VIEWER_URL}#v2:${currentGUID}:${currentKey};
+            if (navigator.share && url) {
+                navigator.share({ title: 'iKey', url }).catch(() => {});
+            } else if (url) {
+                prompt('QR URL', url);
+            }
+        }
+
+        function editSection(section) {
+            showUpdateForm(ownerPassword);
+        }
+
+        function testQR() {
+            if (window.currentQRUrl) {
+                window.open(window.currentQRUrl, '_blank');
+            }
+        }
+
+        function showStatus(message, type) {
+            const element = document.getElementById('status-message');
+            if (!element) return;
+
+            element.className = 'status-message status-' + type;
+            element.textContent = message;
+            element.style.display = 'block';
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    element.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function showError(message) {
+            const container = document.getElementById('main-content');
+            container.innerHTML = 
+                <div class="header">
+                    <h1>❌ Error</h1>
+                </div>
+                <div class="content">
+                    <div class="status-message status-error">
+                        ${message}
+                    </div>
+                    <button class="btn" onclick="showCreationForm()">Create New iKey</button>
+                </div>
+            ;
+        }
+
+        function toggleHelp() {
+            const helpContent = document.getElementById('help-content');
+            if (!helpContent) return;
+
+            if (helpContent.classList.contains('active')) {
+                helpContent.classList.remove('active');
+            } else {
+                helpContent.innerHTML = 
+                    <h4>How iKey Works</h4>
+                    <p>Your information is encrypted before leaving your device:</p>
+                    <ul>
+                        <li>✓ Public info helps in emergencies</li>
+                        <li>✓ Private info needs your password</li>
+                        <li>🔑 Your iKey code is the only way to decrypt</li>
+                    </ul>
+                    <p><strong>True Security:</strong><br>
+                    Not even iKey can access your data. The QR code contains<br>
+                    the only decryption key that exists. Lose it = lose access forever.</p>
+                ;
+                helpContent.classList.add('active');
+            }
+        }
+
+        // Dev Tools Functions
+        function toggleDevTools() {
+            const panel = document.getElementById('dev-panel');
+            panel.classList.toggle('active');
+        }
+
+        async function devLoadQR() {
+            const guid = document.getElementById('dev-guid').value;
+            const key = document.getElementById('dev-key').value;
+
+            if (!guid || !key) {
+                document.getElementById('dev-output').textContent = 'Please enter both GUID and Key';
+                return;
+            }
+
+            document.getElementById('dev-output').textContent = 'Loading...';
+
+            try {
+                await loadAndDisplayEmergencyInfo(guid, key, null, null);
+                document.getElementById('dev-output').textContent = 'Successfully loaded QR data';
+            } catch (error) {
+                document.getElementById('dev-output').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function devTestArchive() {
+            const guid = document.getElementById('dev-guid').value;
+            if (!guid) {
+                document.getElementById('dev-output').textContent = 'Please enter a GUID';
+                return;
+            }
+
+            const archiveUrl = ${ARCHIVE_BASE}${guid}.json?ts=${Date.now()};
+            document.getElementById('dev-output').textContent = Testing: ${archiveUrl}\n\nFetching...;
+
+            try {
+                const response = await fetch(archiveUrl, { mode: 'cors', cache: 'no-store' });
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('dev-output').textContent =
+                        Success! Found on Archive.org\n\n +
+                        Encrypted: ${data.encrypted}\n +
+                        Version: ${data.version}\n\n +
+                        Raw JSON:\n${JSON.stringify(data, null, 2)};
+                } else {
+                    document.getElementById('dev-output').textContent = 
+                        Not found on Archive.org (${response.status})\n\n +
+                        This GUID may not have been uploaded yet.;
+                }
+            } catch (error) {
+                document.getElementById('dev-output').textContent = 
+                    Fetch error: ${error.message}\n\n +
+                    This could be a CORS issue or network problem.;
+            }
+        }
+
+        async function devScanQR() {
+            const file = document.getElementById('dev-qr-upload').files[0];
+            const output = document.getElementById('dev-output');
+            if (!file) {
+                output.textContent = 'Please select a QR image file';
+                return;
+            }
+
+            output.textContent = 'Scanning QR image...';
+            try {
+                const data = await scanFileForQR(file);
+                if (!data) {
+                    output.textContent = 'Unable to read QR code from image';
+                    return;
+                }
+
+                output.textContent = QR detected: ${data};
+                const { guid, key } = parseQRData(data);
+                await loadAndDisplayEmergencyInfo(guid, key, null, null);
+                output.textContent += '\nLoaded QR data';
+            } catch (error) {
+                output.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        function parseQRData(text) {
+            let guid, key;
+            if (text.includes('v2:')) {
+                const hash = text.split('#')[1];
+                const parts = hash.split(':');
+                guid = parts[1];
+                key = parts[2];
+            } else if (text.includes('http')) {
+                const parts = text.split('#');
+                const url = new URL(parts[0]);
+                guid = url.searchParams.get('guid');
+                key = parts[1];
+            } else if (text.includes('#')) {
+                [guid, key] = text.split('#');
+            }
+            if (!guid || !key) {
+                throw new Error('Invalid QR data');
+            }
+            return { guid, key };
+        }
+
+        function scanFileForQR(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const code = jsQR(imageData.data, canvas.width, canvas.height);
+                        resolve(code ? code.data : null);
+                    };
+                    img.onerror = () => reject(new Error('Invalid image')); 
+                    img.src = reader.result;
+                };
+                reader.onerror = () => reject(new Error('File reading failed'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function devShowRawData() {
+            if (!currentData) {
+                document.getElementById('dev-output').textContent = 'No data loaded';
+                return;
+            }
+
+            document.getElementById('dev-output').textContent = 
+                Current Data:\n\n +
+                GUID: ${currentGUID}\n +
+                Key: ${currentKey}\n +
+                Mode: ${currentMode}\n\n +
+                Raw Data:\n${JSON.stringify(currentData, null, 2)};
+        }
+
+         function devClearStorage() {
+             currentGUID = null;
+             currentKey = null;
+             currentData = null;
+             document.getElementById('dev-output').textContent = 'All data cleared';
+         }
+
+         let location911Enabled = false;
+
+        window.addEventListener('message', function(e) {
+            if (e.data && e.data.type === 'text911Height') {
+                const frame = document.getElementById('text911Frame');
+                if (frame) {
+                    frame.style.height = e.data.height + 'px';
+                }
+            } else if (e.data && e.data.type === 'closeHealthRecords') {
+                showQRTab();
+            }
+        });
+
+        function show911Tab() {
+            document.getElementById('clientCreatorTab').style.display = 'none';
+            document.getElementById('qrTab').style.display = 'none';
+            document.getElementById('healthRecordsTab').style.display = 'none';
+            document.getElementById('text911Tab').style.display = 'block';
+
+             if (!location911Enabled) {
+                 document.getElementById('location-permission-prompt').style.display = 'block';
+                 document.getElementById('location-content').style.display = 'none';
+             }
+         }
+
+        function confirmEmergencyAccess() {
+            if (confirm('Open Emergency Services?')) {
+                show911Tab();
+            }
+        }
+
+       async function showHealthRecordsTab() {
+            if (!ownerPassword) {
+                await ownerLogin();
+                if (!ownerPassword) return;
+            }
+            try {
+                await window.healthApp.loadVault(ownerPassword);
+                document.getElementById('clientCreatorTab').style.display = 'none';
+                document.getElementById('qrTab').style.display = 'none';
+                document.getElementById('text911Tab').style.display = 'none';
+                const frame = document.getElementById('healthRecordsFrame');
+                const setFrameHeight = () => {
+                    frame.style.height = window.innerHeight + 'px';
+                };
+                setFrameHeight();
+                window.addEventListener('resize', setFrameHeight);
+                if (!frame.src) {
+                    frame.src = 'health-records.html';
+                }
+                document.getElementById('healthRecordsTab').style.display = 'block';
+            } catch (e) {
+                alert('Unable to unlock health records');
+            }
+        }
+
+        function showClientCreator() {
+            document.getElementById('clientCreatorTab').style.display = 'block';
+            document.getElementById('qrTab').style.display = 'none';
+            document.getElementById('text911Tab').style.display = 'none';
+            document.getElementById('healthRecordsTab').style.display = 'none';
+        }
+
+        function showQRTab() {
+            document.getElementById('clientCreatorTab').style.display = 'none';
+            document.getElementById('qrTab').style.display = 'block';
+            document.getElementById('text911Tab').style.display = 'none';
+            document.getElementById('healthRecordsTab').style.display = 'none';
+        }
+
+         async function requestLocationAndLoad911() {
+             try {
+                 // Request location permission
+                 await navigator.geolocation.getCurrentPosition(
+                     (position) => {
+                         // Permission granted
+                         location911Enabled = true;
+                         document.getElementById('location-permission-prompt').style.display = 'none';
+                         document.getElementById('location-content').style.display = 'block';
+
+                         // Load the text-911.html in iframe
+                         const iframe = document.getElementById('text911Frame');
+                         iframe.src = 'text-911.html';
+                     },
+                     (error) => {
+                         alert('Location access is required for 911 emergency features. Please enable location in your browser settings.');
+                     },
+                     { enableHighAccuracy: true }
+                 );
+             } catch (error) {
+                 alert('Unable to access location. Please check your browser settings.');
+             }
+         }
+
+        // Add click handler for logo and select initial tab
+        document.addEventListener('DOMContentLoaded', function() {
+            const logo = document.querySelector('.logo');
+            if (logo) {
+                logo.addEventListener('click', showClientCreator);
+            }
+            // If a QR hash is present, show the emergency view. Otherwise default to the client creator.
+            if (window.location.hash) {
+                showQRTab();
+            } else {
+                showClientCreator();
+            }
+        });
+
+         // Allow closing dev tools
+         document.addEventListener('keydown', function(e) {
+             if (e.key === 'Escape') {
+                 document.getElementById('dev-panel').classList.remove('active');
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            const panel = document.getElementById('dev-panel');
+            if (panel.classList.contains('active') &&
+                !e.target.closest('.dev-panel') &&
+                !e.target.closest('.dev-trigger')) {
+                panel.classList.remove('active');
+            }
+        });
+
+        // Triple-click to show dev tools
+        let clickCount = 0;
+        let clickTimer = null;
+
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.dev-trigger') || e.target.closest('.dev-panel')) return;
+
+            clickCount++;
+
+            if (clickCount === 3) {
+                document.querySelector('.dev-trigger').style.opacity = '1';
+                clickCount = 0;
+            }
+
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(() => {
+                clickCount = 0;
+            }, 500);
+        });
+    </script>
+    </div>
+    <div id="healthRecordsTab" style="display:none;">
+        <iframe id="healthRecordsFrame" style="border:none;width:100%;height:100vh;"></iframe>
+    </div>
+    <div id="text911Tab" style="display:none;">
+        <div class="container">
+            <div class="header">
+                <h1>📍 911 Emergency Location</h1>
+                <p>Share your precise location for emergency services</p>
+            </div>
+            <div class="content">
+                <div id="location-permission-prompt" style="display:block;">
+                    <div class="privacy-notice">
+                        <h3>🔒 Your Privacy is Protected</h3>
+                        <ul style="text-align: left; margin: 20px 0;">
+                            <li>Location is ONLY used when you're on this screen</li>
+                            <li>Nothing is saved online or stored anywhere</li>
+                            <li>Location data stays on your device</li>
+                            <li>Only shared if YOU choose to text 911</li>
+                        </ul>
+                    </div>
+                    <button class="btn" onclick="requestLocationAndLoad911()">
+                        <span>Enable Location for Emergency Use</span>
+                    </button>
+                </div>
+                <div id="location-content" style="display:none;">
+                    <iframe id="text911Frame" style="border:none;width:100%;height:1px;" scrolling="no"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+class SessionManager {
+    constructor() {
+        this.defaultDuration = 45 * 60 * 1000;
+        this.duration = this.defaultDuration;
+        this.extendDuration = 30 * 60 * 1000;
+        this.expiration = null;
+        this.interval = null;
+        this.warning5Shown = false;
+        this.warning1Shown = false;
+        this.autoSaveTimer = null;
+        this.ring = document.getElementById('session-timer');
+        this.countdown = document.getElementById('session-countdown');
+        this.buildUI();
+        this.attachListeners();
+
+        const storedExpiration = parseInt(localStorage.getItem('sessionExpiration'), 10);
+        const storedDuration = parseInt(localStorage.getItem('sessionDuration'), 10);
+        if (storedExpiration && storedExpiration > Date.now()) {
+            this.duration = storedDuration || this.defaultDuration;
+            this.expiration = storedExpiration;
+            this.updateRing();
+            this.interval = setInterval(() => this.tick(), 1000);
+        } else if (storedExpiration) {
+            this.expire();
+        } else {
+            this.reset();
+        }
+    }
+
+    buildUI() {
+        // Warning banner
+        this.banner = document.createElement('div');
+        this.banner.id = 'session-warning';
+        this.banner.className = 'session-banner';
+        this.banner.innerHTML = `Your session will expire in <span id="banner-time">5 minutes</span>
+            <button id="continue-btn">Continue Working</button>
+            <button id="save-logout-btn">Save & Logout</button>`;
+        document.body.appendChild(this.banner);
+        document.getElementById('continue-btn').addEventListener('click', () => this.reset());
+        document.getElementById('save-logout-btn').addEventListener('click', () => this.expire());
+
+        // Modal
+        this.modal = document.createElement('div');
+        this.modal.id = 'session-modal';
+        this.modal.className = 'session-modal';
+        this.modal.innerHTML = `<div class="session-modal-content">
+            <p>Session expiring in <span id="modal-time">60</span>...</p>
+            <button id="extend-btn">Extend Session - 30 min</button>
+            <button id="logout-btn">Logout Now</button>
+        </div>`;
+        document.body.appendChild(this.modal);
+        document.getElementById('extend-btn').addEventListener('click', () => {
+            this.duration = this.extendDuration;
+            this.reset();
+            this.hideModal();
+        });
+        document.getElementById('logout-btn').addEventListener('click', () => this.expire());
+
+        // Expired overlay
+        this.expired = document.createElement('div');
+        this.expired.id = 'session-expired';
+        this.expired.className = 'session-expired';
+        this.expired.innerHTML = `<div class="session-expired-content">
+            <p>Session expired for your security</p>
+            <button id="login-again-btn">Login Again</button>
+            <button id="public-view-btn">Go to Public View</button>
+        </div>`;
+        document.body.appendChild(this.expired);
+        document.getElementById('login-again-btn').addEventListener('click', () => {
+            this.restoreDraft();
+            this.hideExpired();
+            this.reset();
+            if (typeof ownerPassword !== 'undefined' && ownerPassword && typeof showOwnerDashboard === 'function') {
+                showOwnerDashboard();
+            }
+        });
+        document.getElementById('public-view-btn').addEventListener('click', () => window.location.reload());
+    }
+
+    attachListeners() {
+        const activity = () => {
+            this.duration = this.defaultDuration;
+            this.reset();
+            resetIdle();
+        };
+        const resetIdle = () => {
+            clearTimeout(this.idleTimer);
+            this.idleTimer = setTimeout(() => this.showIdleReminder(), 5 * 60 * 1000);
+        };
+        ['mousemove', 'keydown', 'click', 'touchstart'].forEach(evt =>
+            document.addEventListener(evt, activity)
+        );
+        document.addEventListener('scroll', activity, { passive: true });
+        resetIdle();
+        document.addEventListener('input', e => {
+            if (e.target.matches('input, textarea, select')) {
+                this.scheduleAutoSave();
+            }
+        });
+    }
+
+    reset() {
+        this.expiration = Date.now() + this.duration;
+        localStorage.setItem('sessionExpiration', this.expiration);
+        localStorage.setItem('sessionDuration', this.duration);
+        this.warning5Shown = false;
+        this.warning1Shown = false;
+        this.hideBanner();
+        this.hideModal();
+        this.hideExpired();
+        this.updateRing();
+        if (!this.interval) {
+            this.interval = setInterval(() => this.tick(), 1000);
+        }
+    }
+
+    tick() {
+        const remaining = this.expiration - Date.now();
+        if (remaining <= 0) {
+            this.expire();
+            return;
+        }
+        this.updateRing(remaining);
+        if (remaining <= 60 * 1000 && !this.warning1Shown) {
+            this.showModal(remaining);
+            this.warning1Shown = true;
+        } else if (remaining <= 5 * 60 * 1000 && !this.warning5Shown) {
+            this.showBanner(remaining);
+            this.warning5Shown = true;
+        }
+    }
+
+    updateRing(remaining = this.expiration - Date.now()) {
+        const total = this.duration;
+        const progress = 360 * (1 - remaining / total);
+        const elapsedMin = (total - remaining) / 60000;
+        let color = '#4caf50';
+        if (elapsedMin >= 40) color = '#ff9800';
+        else if (elapsedMin >= 30) color = '#ffeb3b';
+        this.ring.style.setProperty('--progress', progress + 'deg');
+        this.ring.style.setProperty('--ring-color', color);
+        this.countdown.textContent = Math.ceil(remaining / 60000) + 'm';
+        if (remaining <= 5 * 60 * 1000) this.ring.classList.add('pulse');
+        else this.ring.classList.remove('pulse');
+    }
+
+    showBanner(remaining) {
+        document.getElementById('banner-time').textContent = Math.ceil(remaining / 60000) + ' minutes';
+        this.banner.classList.add('active');
+        setTimeout(() => this.hideBanner(), 10000);
+    }
+    hideBanner() {
+        this.banner.classList.remove('active');
+    }
+
+    showModal(remaining) {
+        const modalTime = document.getElementById('modal-time');
+        modalTime.textContent = Math.ceil(remaining / 1000);
+        this.modal.classList.add('active');
+        this.modalInterval = setInterval(() => {
+            const left = this.expiration - Date.now();
+            if (left <= 0) {
+                clearInterval(this.modalInterval);
+            } else {
+                modalTime.textContent = Math.ceil(left / 1000);
+            }
+        }, 1000);
+    }
+    hideModal() {
+        this.modal.classList.remove('active');
+        if (this.modalInterval) clearInterval(this.modalInterval);
+    }
+
+    showIdleReminder() {
+        if (this.idleNotice) return;
+        this.idleNotice = document.createElement('div');
+        this.idleNotice.className = 'session-banner active';
+        this.idleNotice.textContent = "You've been idle";
+        document.body.appendChild(this.idleNotice);
+        setTimeout(() => {
+            this.idleNotice.classList.remove('active');
+            setTimeout(() => { this.idleNotice.remove(); this.idleNotice = null; }, 300);
+        }, 3000);
+    }
+
+    expire() {
+        this.autoSave();
+        this.hideBanner();
+        this.hideModal();
+        this.expired.classList.add('active');
+        clearInterval(this.interval);
+        this.interval = null;
+        localStorage.removeItem('sessionExpiration');
+        localStorage.removeItem('sessionDuration');
+    }
+    hideExpired() {
+        this.expired.classList.remove('active');
+    }
+
+    scheduleAutoSave() {
+        clearTimeout(this.autoSaveTimer);
+        this.autoSaveTimer = setTimeout(() => this.autoSave(), 15000);
+    }
+
+    autoSave() {
+        clearTimeout(this.autoSaveTimer);
+        const status = document.getElementById('autosave-status');
+        if (status) status.textContent = 'Saving...';
+
+        const draft = {};
+        document.querySelectorAll('input, textarea, select').forEach(el => {
+            const id = el.id || el.name;
+            if (id === 'pin') return;
+            draft[id] = el.value;
+        });
+        localStorage.setItem('sessionDraft', JSON.stringify(draft));
+        this.saveToArchive(draft);
+
+        if (status) {
+            status.textContent = 'Saved';
+            setTimeout(() => { status.textContent = ''; }, 2000);
+        }
+    }
+
+    saveToArchive(data) {
+        const url = 'https://web.archive.org/save/' + encodeURIComponent(location.href);
+        try {
+            const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon(url, blob);
+            } else {
+                fetch(url, { method: 'POST', body: blob, mode: 'no-cors' });
+            }
+        } catch (e) {
+            console.error('Archive save failed', e);
+        }
+    }
+
+    restoreDraft() {
+        const data = localStorage.getItem('sessionDraft');
+        if (!data) return;
+        const draft = JSON.parse(data);
+        Object.keys(draft).forEach(key => {
+            if (key === 'pin') return;
+            const el = document.getElementById(key);
+            if (el) el.value = draft[key];
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (!window.sessionManager && document.getElementById('session-timer')) {
+        window.sessionManager = new SessionManager();
+    }
+});
+</script>
+</body>
+</html>
