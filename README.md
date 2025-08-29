@@ -19,3 +19,10 @@ To target a different viewer in another environment, define a global
 This overrides the default and ensures generated URLs and on‑page messaging use
 the specified base path.
 
+## PIN Encryption
+
+When generating a QR record you must provide a 6-digit PIN. This PIN derives an
+AES-GCM key via PBKDF2 and encrypts the private portion of the record. The salt
+and ciphertext are stored with the record but the raw PIN or derived key are
+never saved. If the PIN is lost the data cannot be recovered.
+

@@ -209,7 +209,9 @@ class SessionManager {
 
         const draft = {};
         document.querySelectorAll('input, textarea, select').forEach(el => {
-            draft[el.id || el.name] = el.value;
+            const id = el.id || el.name;
+            if (id === 'pin') return;
+            draft[id] = el.value;
         });
         localStorage.setItem('sessionDraft', JSON.stringify(draft));
         this.saveToArchive(draft);
@@ -239,6 +241,7 @@ class SessionManager {
         if (!data) return;
         const draft = JSON.parse(data);
         Object.keys(draft).forEach(key => {
+            if (key === 'pin') return;
             const el = document.getElementById(key);
             if (el) el.value = draft[key];
         });

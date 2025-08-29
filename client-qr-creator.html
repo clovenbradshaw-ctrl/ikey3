@@ -98,6 +98,9 @@
           <label for="ecRel">Emergency contact – relationship</label>
           <input id="ecRel" placeholder="Spouse" />
 
+          <label for="pin">6-digit PIN</label>
+          <input id="pin" type="password" inputmode="numeric" pattern="\d{6}" maxlength="6" required />
+
           <div class="divider"></div>
           <div class="row">
             <div>
@@ -165,7 +168,7 @@
     for (const b of arr) s += String.fromCharCode(b);
     return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   }
-  function buildUrl(guid,key){
+  function buildUrl(guid,key,pin){
     const embedded = btoa(
       JSON.stringify({
         n: cName.value.trim(),
@@ -188,6 +191,12 @@
       statusBadge.className='badge err';
       return false;
     }
+    const pinVal = pinEl.value.trim();
+    if(!/^\d{6}$/.test(pinVal)){
+      statusBadge.textContent='6-digit PIN required';
+      statusBadge.className='badge err';
+      return false;
+    }
     statusBadge.textContent='Ready';
     statusBadge.className='badge ok';
     return true;
@@ -200,6 +209,7 @@
   const ecName = document.getElementById('ecName');
   const ecPhone = document.getElementById('ecPhone');
   const ecRel = document.getElementById('ecRel');
+  const pinEl = document.getElementById('pin');
   const guidEl = document.getElementById('guid');
   const keyEl = document.getElementById('key');
   const urlOut = document.getElementById('urlOut');
@@ -238,7 +248,7 @@
   }
 
   function updateOutputs(){
-    const url = buildUrl(currentGUID,currentKey);
+    const url = buildUrl(currentGUID,currentKey,pinEl.value.trim());
     urlOut.textContent = url;
     renderQR(url);
   }
