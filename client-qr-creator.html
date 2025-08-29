@@ -250,14 +250,16 @@
     urlOut.textContent = url;
     renderQR(url);
   }
-  updateOutputs();
 
   // ——— Actions ———
   document.getElementById('regenAll').addEventListener('click', ()=>{
     currentGUID = generateGUID();
     currentKey = generateKey();
     guidEl.value = currentGUID; keyEl.value = currentKey;
-    updateOutputs(); showToast('New IDs generated');
+    // Do not generate a new QR until the user saves their info and PIN
+    urlOut.textContent = '—';
+    qrBox.innerHTML = '';
+    showToast('New IDs generated');
   });
 
   document.getElementById('saveClient').addEventListener('click', async ()=>{
