@@ -1890,16 +1890,17 @@
             html += `</div>`; // Close basic section
 
             // PIN-protected sections
-            if (fullData.pinProtected && !pinUnlocked) {
+            const hasPrivateInfo = publicInfo.medications || publicInfo.contact;
+            if (hasPrivateInfo && !pinUnlocked) {
                 html += `
                     <div class="private-section">
                         <h3>🔒 Additional Information</h3>
-                        <p>This section contains medications and contact information.</p>
+                        <p>This section contains medications and emergency contact details.</p>
                         <button class="btn btn-outline" onclick="requestPinUnlock()">
                             Enter PIN to View
                         </button>
                     </div>`;
-            } else if (pinUnlocked || !fullData.pinProtected) {
+            } else if (hasPrivateInfo && pinUnlocked) {
                 // Show PIN-protected content
                 if (publicInfo.medications) {
                     html += `
