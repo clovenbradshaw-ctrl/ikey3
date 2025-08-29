@@ -49,7 +49,11 @@
     <header style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px">
       <div>
         <h1 style="margin:0;font-size:26px;letter-spacing:.2px">Client QR Creator</h1>
+
         <div class="mini">Targets <span class="pill">https://clovenbradshaw-ctrl.github.io/ikey3/</span><span class="pill">#v2:&lt;guid&gt;:&lt;encryption&gt;:&lt;embedded&gt;</span></div>
+
+        <div class="mini">Targets <span class="pill" id="viewerPrefix"></span><span class="pill">&lt;guid&gt;#&lt;encryption&gt;</span></div>
+
       </div>
       <div class="stack">
         <span id="statusBadge" class="badge ok">Ready</span>
@@ -140,7 +144,11 @@
   <div id="toast" class="toast" role="status" aria-live="polite">Copied!</div>
 
 <script>
-  const VIEWER_URL = 'https://clovenbradshaw-ctrl.github.io/ikey3/';
+  // Base URL for the viewer. Override by defining window.IKEY3_VIEWER_URL
+  // before this script runs. Defaults to the parent directory of the
+  // current location.
+  const VIEWER_URL = window.IKEY3_VIEWER_URL || new URL('../', window.location.href).href;
+  document.getElementById('viewerPrefix').textContent = VIEWER_URL;
 
   // ——— Helpers ———
   function generateGUID(){
