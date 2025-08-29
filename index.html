@@ -2387,9 +2387,7 @@
                         return;
                     }
                     try {
-                        const salt = new Uint8Array(ThreeLayerEncryption.base64ToArrayBuffer(fullData.pinSalt));
-                        const key = await ThreeLayerEncryption.derivePinKey(pin, salt);
-                        const priv = await ThreeLayerEncryption.decrypt(fullData.privateCipher, key);
+                        const priv = await ThreeLayerEncryption.unlockPrivate(fullData, pin);
                         privateDataEl.textContent = JSON.stringify(priv, null, 2);
                         pinForm.style.display = 'none';
                     } catch (err) {

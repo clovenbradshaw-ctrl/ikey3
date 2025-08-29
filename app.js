@@ -147,6 +147,17 @@ class ThreeLayerEncryption {
   }
 
   static async unlockPrivate(storedData, pin) {
+    if (!storedData?.privateCipher || !storedData?.pinSalt) {
+      throw new Error('No private data');
+    }
+    const salt = new Uint8Array(this.base64ToArrayBuffer(storedData.pinSalt));
+    const pinKey = await this.derivePinKey(pin, salt);
+    try {
+      return await this.decrypt(storedData.privateCipher, pinKey);
+    } catch (err) {
+      throw new Error('Invalid PIN');
+    }
+
     const salt = new Uint8Array(this.base64ToArrayBuffer(storedData.pinSalt));
     const pinKey = await this.derivePinKey(pin, salt);
     return await this.decrypt(storedData.privateCipher, pinKey);
