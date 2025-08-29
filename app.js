@@ -112,7 +112,7 @@ class ThreeLayerEncryption {
   }
 
   // Build encrypted record and return GUID + qrKey
-  static async buildRecord(emergencyInfo, privateInfo, healthRecords, password, pin) {
+  static async buildRecord(emergencyInfo, privateInfo, healthRecords, pin) {
     const guid = self.crypto.randomUUID();
     const qrKey = this.generateQrKey();
 
@@ -146,13 +146,17 @@ class ThreeLayerEncryption {
     return await this.decrypt(storedData.publicData, qrKey);
   }
 
-  static async unlockPrivate(storedData, qrKey, password) {
-    const gate = await this.sha256(qrKey + password);
-    if (!storedData.privateInfo || storedData.privateInfo.encryptedWith !== gate) {
-      throw new Error('Invalid password');
+  static async unlockPrivate(storedData, pin) {
+    if (!storedData?.privateCipher || !storedData?.pinSalt) {
+      throw new Error('No private data');
     }
-    const { encryptedWith, ...info } = storedData.privateInfo;
-    return info;
+    const salt = new Uint8Array(this.base64ToArrayBuffer(storedData.pinSalt));
+    const pinKey = await this.derivePinKey(pin, salt);
+    try {
+      return await this.decrypt(storedData.privateCipher, pinKey);
+    } catch (err) {
+      throw new Error('Invalid PIN');
+    }
   }
 
   static async unlockVault(storedData, qrKey) {

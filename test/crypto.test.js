@@ -1,5 +1,6 @@
 const assert = require('assert');
 const { ThreeLayerEncryption } = require('../app.js');
+globalThis.crypto = globalThis.crypto || require('crypto').webcrypto;
 
 (async () => {
   globalThis.self = globalThis;
@@ -12,5 +13,15 @@ const { ThreeLayerEncryption } = require('../app.js');
   const enc = await ThreeLayerEncryption.encrypt(secret, key1);
   const dec = await ThreeLayerEncryption.decrypt(enc, key1);
   assert.deepStrictEqual(dec, secret, 'encrypt/decrypt round trip');
+  const emergencyInfo = { name: 'Alice' };
+  const privateInfo = { ssn: '111-22-3333' };
+  const health = { records: [] };
+  const record = await ThreeLayerEncryption.buildRecord(emergencyInfo, privateInfo, health, pin);
+  const unlocked = await ThreeLayerEncryption.unlockPrivate(record.storedData, pin);
+  assert.deepStrictEqual(unlocked, privateInfo, 'unlockPrivate should decrypt private info');
+  await assert.rejects(
+    ThreeLayerEncryption.unlockPrivate(record.storedData, '000000'),
+    /Invalid PIN/
+  );
   console.log('All crypto tests passed');
 })();
