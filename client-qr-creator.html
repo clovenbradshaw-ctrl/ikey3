@@ -249,6 +249,7 @@
     const url = buildUrl(currentGUID,currentKey);
     urlOut.textContent = url;
     renderQR(url);
+    return url;
   }
 
   // ——— Actions ———
@@ -288,7 +289,8 @@
     } catch {}
 
     showToast('QR generated');
-    updateOutputs();
+    const profileUrl = updateOutputs();
+    window.open(profileUrl, '_blank');
   });
 
   document.getElementById('clearForm').addEventListener('click', ()=>{
