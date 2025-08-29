@@ -1580,8 +1580,216 @@
 #c53030;
         }
         .allergy-warnings .medium {
-            color: 
+            color:
 #d69e2e;
+        }
+
+        /* PIN Pad Styles */
+        .pin-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, #0f0f1e 0%, #1a1a2e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .pin-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .pin-overlay::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        .pin-container {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+        }
+
+        .pin-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .lock-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 15px;
+        }
+
+        .lock-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke: #6366f1;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .pin-title {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .pin-subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            font-weight: 300;
+        }
+
+        .pin-display {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 35px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            min-height: 70px;
+            align-items: center;
+        }
+
+        .pin-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .pin-dot.filled {
+            background: #6366f1;
+            border-color: #6366f1;
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .pin-dot.error {
+            animation: shake 0.5s;
+            background: #ef4444;
+            border-color: #ef4444;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .pin-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .pin-key {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 24px;
+            font-weight: 300;
+            height: 70px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pin-key:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        .pin-key:active {
+            transform: translateY(0);
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .pin-key.zero-key {
+            grid-column: 2;
+        }
+
+        .pin-action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .pin-action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+        }
+
+        .pin-action-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .pin-action-btn.delete {
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .pin-action-btn.delete:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.5);
+            color: #ef4444;
+        }
+
+        .pin-action-btn.cancel {
+            border-color: rgba(156, 163, 175, 0.3);
+        }
+
+        .pin-error-message {
+            color: #ef4444;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            min-height: 20px;
         }
 
         .emergency-card {
@@ -1669,7 +1877,54 @@
             <button onclick="toggleDevTools()">Close</button>
         </div>
 
-        <div class="dev-output" id="dev-output"></div>
+    <div class="dev-output" id="dev-output"></div>
+    </div>
+
+    <!-- PIN Pad Overlay -->
+    <div id="pin-overlay" class="pin-overlay">
+        <div class="pin-container">
+            <div class="pin-header">
+                <div class="lock-icon">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                </div>
+                <h1 class="pin-title">Enter Security PIN</h1>
+                <p class="pin-subtitle">Please enter your 6-digit code</p>
+            </div>
+
+            <div class="pin-display" id="pinDisplay">
+                <div class="pin-dot" id="dot1"></div>
+                <div class="pin-dot" id="dot2"></div>
+                <div class="pin-dot" id="dot3"></div>
+                <div class="pin-dot" id="dot4"></div>
+                <div class="pin-dot" id="dot5"></div>
+                <div class="pin-dot" id="dot6"></div>
+            </div>
+
+            <div class="pin-keypad">
+                <button class="pin-key" data-value="1">1</button>
+                <button class="pin-key" data-value="2">2</button>
+                <button class="pin-key" data-value="3">3</button>
+                <button class="pin-key" data-value="4">4</button>
+                <button class="pin-key" data-value="5">5</button>
+                <button class="pin-key" data-value="6">6</button>
+                <button class="pin-key" data-value="7">7</button>
+                <button class="pin-key" data-value="8">8</button>
+                <button class="pin-key" data-value="9">9</button>
+                <div></div>
+                <button class="pin-key zero-key" data-value="0">0</button>
+                <div></div>
+            </div>
+
+            <div class="pin-action-row">
+                <button class="pin-action-btn delete" id="clearBtn">Clear</button>
+                <button class="pin-action-btn cancel" id="cancelBtn">Cancel</button>
+            </div>
+
+            <div class="pin-error-message" id="pinErrorMessage"></div>
+        </div>
     </div>
 
     <!-- QR Libraries -->
@@ -2504,8 +2759,146 @@ window.initMedicationField = initMedicationField;
         let uploadCheckInterval = null;
         let sessionTimeoutHandle = null;
         const SESSION_DURATION = 15 * 60 * 1000;
+        let pinUnlocked = false;
+        let currentPIN = null;
+        let pinEntry = '';
+        let pinAttempts = 0;
+        const maxPinAttempts = 3;
+
+        function initPinPad() {
+            const keys = document.querySelectorAll('.pin-key[data-value]');
+            const clearBtn = document.getElementById('clearBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const dots = document.querySelectorAll('.pin-dot');
+
+            function updatePinDisplay() {
+                dots.forEach((dot, index) => {
+                    if (index < pinEntry.length) {
+                        dot.classList.add('filled');
+                    } else {
+                        dot.classList.remove('filled');
+                    }
+                    dot.classList.remove('error');
+                });
+            }
+
+            function clearPin() {
+                pinEntry = '';
+                updatePinDisplay();
+                const err = document.getElementById('pinErrorMessage');
+                if (err) err.textContent = '';
+            }
+
+            function submitPin() {
+                if (pinEntry.length === 6) {
+                    verifyPin(pinEntry);
+                }
+            }
+
+            keys.forEach(key => {
+                key.addEventListener('click', () => {
+                    if (pinEntry.length < 6) {
+                        pinEntry += key.getAttribute('data-value');
+                        updatePinDisplay();
+                        if (pinEntry.length === 6) {
+                            setTimeout(() => submitPin(), 300);
+                        }
+                    }
+                });
+            });
+
+            if (clearBtn) clearBtn.addEventListener('click', clearPin);
+            if (cancelBtn) cancelBtn.addEventListener('click', () => {
+                closePinPad();
+                clearPin();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                const overlay = document.getElementById('pin-overlay');
+                if (!overlay.classList.contains('active')) return;
+
+                if (e.key >= '0' && e.key <= '9' && pinEntry.length < 6) {
+                    pinEntry += e.key;
+                    updatePinDisplay();
+                    if (pinEntry.length === 6) {
+                        setTimeout(() => submitPin(), 300);
+                    }
+                } else if (e.key === 'Backspace' || e.key === 'Delete') {
+                    clearPin();
+                } else if (e.key === 'Escape') {
+                    closePinPad();
+                    clearPin();
+                }
+            });
+        }
+
+        function showPinPad(callback) {
+            window.pinCallback = callback || null;
+            const overlay = document.getElementById('pin-overlay');
+            overlay.classList.add('active');
+            pinEntry = '';
+            const dots = document.querySelectorAll('.pin-dot');
+            dots.forEach(dot => {
+                dot.classList.remove('filled', 'error');
+            });
+            const err = document.getElementById('pinErrorMessage');
+            if (err) err.textContent = '';
+        }
+
+        function closePinPad() {
+            const overlay = document.getElementById('pin-overlay');
+            overlay.classList.remove('active');
+            window.pinCallback = null;
+        }
+
+        async function verifyPin(enteredPin) {
+            if (!currentBlob || !currentBlob.pinSalt) {
+                const err = document.getElementById('pinErrorMessage');
+                if (err) err.textContent = 'No PIN set';
+                return;
+            }
+            try {
+                const salt = new Uint8Array(ThreeLayerEncryption.base64ToArrayBuffer(currentBlob.pinSalt));
+                const key = await ThreeLayerEncryption.derivePinKey(enteredPin, salt);
+                const priv = await ThreeLayerEncryption.decrypt(currentBlob.privateCipher, key);
+                pinUnlocked = true;
+                currentPIN = enteredPin;
+                currentBlob.privateInfo = priv;
+                closePinPad();
+                if (window.pinCallback) {
+                    window.pinCallback(true, enteredPin);
+                }
+                displayEmergencyInfo(currentBlob);
+            } catch (err) {
+                pinAttempts++;
+                const dots = document.querySelectorAll('.pin-dot');
+                dots.forEach(dot => dot.classList.add('error'));
+                const errorEl = document.getElementById('pinErrorMessage');
+                if (pinAttempts >= maxPinAttempts) {
+                    if (errorEl) errorEl.textContent = 'Too many attempts. Please wait 30 seconds.';
+                    setTimeout(() => {
+                        pinAttempts = 0;
+                        closePinPad();
+                    }, 30000);
+                } else {
+                    if (errorEl) errorEl.textContent = `Incorrect PIN. ${maxPinAttempts - pinAttempts} attempts remaining.`;
+                    setTimeout(() => {
+                        pinEntry = '';
+                        dots.forEach(dot => dot.classList.remove('filled', 'error'));
+                    }, 500);
+                }
+            }
+        }
+
+        function requestPinUnlock() {
+            showPinPad();
+        }
 
         async function parseAndDisplay() {
+            pinUnlocked = false;
+            currentPIN = null;
+            pinEntry = '';
+            pinAttempts = 0;
             const hash = window.location.hash.substring(1);
 
             if (!hash) {
@@ -2648,6 +3041,7 @@ window.initMedicationField = initMedicationField;
             }
 
             buildLanguageButtons();
+            initPinPad();
 
             const savedLang =
                 localStorage.getItem('ikey_preferred_language') ||
@@ -3041,67 +3435,25 @@ window.initMedicationField = initMedicationField;
                 </div>
             ;
 
-            html += `
-                <div id="private-section">
-                  <button id="unlock-btn">Unlock</button>
-                  <form id="pin-form" style="display:none;">
-                    <input id="pin-input" type="password" inputmode="numeric" pattern="\\d{6}" maxlength="6" required />
-                    <button type="submit">Unlock</button>
-                    <span id="pin-error" class="hint"></span>
-                  </form>
-                  <pre id="private-data"></pre>
+            if (fullData.privateCipher && fullData.pinSalt) {
+                if (pinUnlocked && fullData.privateInfo) {
+                    html += `
+                <div class="private-section">
+                    <h3>🔒 Private Information</h3>
+                    <pre id="private-data">${JSON.stringify(fullData.privateInfo, null, 2)}</pre>
                 </div>`;
+                } else {
+                    html += `
+                <div class="private-section">
+                    <h3>🔒 Private Information</h3>
+                    <p>Additional details are protected.</p>
+                    <button class="btn btn-outline" onclick="requestPinUnlock()">Enter PIN to View</button>
+                </div>`;
+                }
+            }
 
             container.innerHTML = html;
             setLanguage(currentLanguage);
-
-            if (fullData.privateCipher && fullData.pinSalt) {
-                const unlockBtn = document.getElementById('unlock-btn');
-                const pinForm = document.getElementById('pin-form');
-                const pinInput = document.getElementById('pin-input');
-                const pinError = document.getElementById('pin-error');
-                const privateDataEl = document.getElementById('private-data');
-                let attempts = 0;
-                let locked = false;
-
-                unlockBtn.addEventListener('click', () => {
-                    unlockBtn.style.display = 'none';
-                    pinForm.style.display = 'block';
-                });
-
-                pinForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    if (locked) return;
-                    const pin = pinInput.value.trim();
-                    if (!/^\\d{6}$/.test(pin)) {
-                        pinError.textContent = 'Enter 6-digit PIN';
-                        return;
-                    }
-                    try {
-                        const salt = new Uint8Array(ThreeLayerEncryption.base64ToArrayBuffer(fullData.pinSalt));
-                        const key = await ThreeLayerEncryption.derivePinKey(pin, salt);
-                        const priv = await ThreeLayerEncryption.decrypt(fullData.privateCipher, key);
-                        privateDataEl.textContent = JSON.stringify(priv, null, 2);
-                        pinForm.style.display = 'none';
-                    } catch (err) {
-                        attempts++;
-                        pinError.textContent = 'Incorrect PIN';
-                        if (attempts >= 3) {
-                            locked = true;
-                            pinInput.disabled = true;
-                            setTimeout(() => {
-                                locked = false;
-                                attempts = 0;
-                                pinInput.disabled = false;
-                                pinError.textContent = '';
-                            }, 30000);
-                        }
-                    }
-                });
-            } else {
-                const sec = document.getElementById('private-section');
-                if (sec) sec.style.display = 'none';
-            }
         }
 
         async function ownerLogin() {
