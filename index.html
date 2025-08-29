@@ -339,6 +339,28 @@
             border-top: none;
         }
 
+        .section-fieldset {
+            border: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+        }
+
+        .section-fieldset legend {
+            width: 100%;
+            font-size: 1rem;
+            color: #2c3e50;
+            margin: 25px 0 15px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            font-weight: 600;
+        }
+
+        .section-fieldset:first-of-type legend {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
         .section-status {
             font-size: 12px;
             padding: 4px 8px;
@@ -1755,11 +1777,47 @@
                 try {
                     const embedded = JSON.parse(atob(embeddedStr));
                     
-                    // Try to load from mock storage first
+                    // Try multiple sources to load the data
+                    let fullData = null;
+                    
+                    // 1. Try mock storage first (for testing)
                     if (CONFIG.USE_MOCK_ARCHIVE && mockArchiveStorage.has(guid)) {
                         const data = mockArchiveStorage.get(guid);
                         const decrypted = await decrypt(data.data, key);
-                        currentBlob = JSON.parse(decrypted);
+                        fullData = JSON.parse(decrypted);
+                        console.log('Loaded from mock storage');
+                    }
+                    
+                    // 2. Try local storage
+                    if (!fullData) {
+                        const localData = localStorage.getItem(`ikey_${guid}`);
+                        if (localData) {
+                            const parsed = JSON.parse(localData);
+                            const decrypted = await decrypt(parsed.data, key);
+                            fullData = JSON.parse(decrypted);
+                            console.log('Loaded from local storage');
+                        }
+                    }
+                    
+                    // 3. Try fetching from Archive.org
+                    if (!fullData && !CONFIG.USE_MOCK_ARCHIVE) {
+                        try {
+                            const archiveUrl = `${CONFIG.ARCHIVE_BASE}${guid}.json`;
+                            const response = await fetch(archiveUrl);
+                            if (response.ok) {
+                                const data = await response.json();
+                                const decrypted = await decrypt(data.data, key);
+                                fullData = JSON.parse(decrypted);
+                                console.log('Loaded from Archive.org');
+                            }
+                        } catch (e) {
+                            console.log('Could not fetch from Archive.org:', e);
+                        }
+                    }
+                    
+                    // Use full data if available, otherwise fall back to embedded
+                    if (fullData) {
+                        currentBlob = fullData;
                     } else {
                         // Create basic blob from embedded data
                         currentBlob = {
@@ -1770,12 +1828,13 @@
                             },
                             pinProtected: embedded.p || false
                         };
+                        console.log('Using embedded data only');
                     }
                     
                     showQRTab();
                     displayEmergencyInfo(currentBlob);
                 } catch (e) {
-                    console.error('Failed to parse embedded data:', e);
+                    console.error('Failed to parse data:', e);
                     showCreationForm();
                 }
             }
@@ -1934,112 +1993,118 @@
                     <p>Your data. Your key. Your control.</p>
                 </div>
                 <div class="content">
-                    <form id="create-form">
-                        <div class="section-title">
-                            Personal Information 
-                            <span class="section-status incomplete" id="personal-status">Incomplete</span>
-                        </div>
+                    <form id="create-form" autocomplete="off">
+                        <fieldset class="section-fieldset">
+                            <legend class="section-title">
+                                Personal Information 
+                                <span class="section-status incomplete" id="personal-status">Incomplete</span>
+                            </legend>
 
-                        <div class="form-group">
-                            <label for="name">Name *</label>
-                            <input type="text" id="name" required placeholder="John Doe">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Blood Type (Optional)</label>
-                            <div class="blood-type-grid">
-                                <label class="blood-type-btn">
-                                    <input type="radio" name="blood-type" value="A+">
-                                    <span>A+</span>
-                                </label>
-                                <label class="blood-type-btn">
-                                    <input type="radio" name="blood-type" value="B+">
-                                    <span>B+</span>
-                                </label>
-                                <label class="blood-type-btn">
-                                    <input type="radio" name="blood-type" value="AB+">
-                                    <span>AB+</span>
-                                </label>
-                                <label class="blood-type-btn">
-                                    <input type="radio" name="blood-type" value="O+">
-                                    <span>O+</span>
-                                </label>
-                                <label class="blood-type-btn">
-                                    <input type="radio" name="blood-type" value="A-">
-                                    <span>A-</span>
-                                </label>
-                                <label class="blood-type-btn">
-                                    <input type="radio" name="blood-type" value="B-">
-                                    <span>B-</span>
-                                </label>
-                                <label class="blood-type-btn">
-                                    <input type="radio" name="blood-type" value="AB-">
-                                    <span>AB-</span>
-                                </label>
-                                <label class="blood-type-btn">
-                                    <input type="radio" name="blood-type" value="O-">
-                                    <span>O-</span>
-                                </label>
+                            <div class="form-group">
+                                <label for="name">Name *</label>
+                                <input type="text" id="name" name="name" required placeholder="John Doe">
                             </div>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="allergies">Allergies</label>
-                            <textarea id="allergies" placeholder="Penicillin, peanuts, etc."></textarea>
-                        </div>
+                            <div class="form-group">
+                                <label>Blood Type (Optional)</label>
+                                <div class="blood-type-grid" role="radiogroup" aria-label="Blood Type">
+                                    <label class="blood-type-btn">
+                                        <input type="radio" name="blood-type" value="A+">
+                                        <span>A+</span>
+                                    </label>
+                                    <label class="blood-type-btn">
+                                        <input type="radio" name="blood-type" value="B+">
+                                        <span>B+</span>
+                                    </label>
+                                    <label class="blood-type-btn">
+                                        <input type="radio" name="blood-type" value="AB+">
+                                        <span>AB+</span>
+                                    </label>
+                                    <label class="blood-type-btn">
+                                        <input type="radio" name="blood-type" value="O+">
+                                        <span>O+</span>
+                                    </label>
+                                    <label class="blood-type-btn">
+                                        <input type="radio" name="blood-type" value="A-">
+                                        <span>A-</span>
+                                    </label>
+                                    <label class="blood-type-btn">
+                                        <input type="radio" name="blood-type" value="B-">
+                                        <span>B-</span>
+                                    </label>
+                                    <label class="blood-type-btn">
+                                        <input type="radio" name="blood-type" value="AB-">
+                                        <span>AB-</span>
+                                    </label>
+                                    <label class="blood-type-btn">
+                                        <input type="radio" name="blood-type" value="O-">
+                                        <span>O-</span>
+                                    </label>
+                                </div>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="medications">Medications</label>
-                            <textarea id="medications" placeholder="Current medications"></textarea>
-                        </div>
+                            <div class="form-group">
+                                <label for="allergies">Allergies</label>
+                                <textarea id="allergies" name="allergies" placeholder="Penicillin, peanuts, etc."></textarea>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="contact-name">Emergency Contact Name *</label>
-                            <input type="text" id="contact-name" required placeholder="Jane Doe">
-                        </div>
+                            <div class="form-group">
+                                <label for="medications">Medications</label>
+                                <textarea id="medications" name="medications" placeholder="Current medications"></textarea>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="contact-phone">Emergency Contact Phone *</label>
-                            <input type="tel" id="contact-phone" required placeholder="(555) 123-4567">
-                        </div>
+                            <div class="form-group">
+                                <label for="contact-name">Emergency Contact Name *</label>
+                                <input type="text" id="contact-name" name="contact-name" required placeholder="Jane Doe">
+                            </div>
 
-                        <div class="section-title">
-                            Security PIN
-                            <span class="section-status incomplete" id="pin-status">Incomplete</span>
-                        </div>
+                            <div class="form-group">
+                                <label for="contact-phone">Emergency Contact Phone *</label>
+                                <input type="tel" id="contact-phone" name="contact-phone" required placeholder="(555) 123-4567">
+                            </div>
+                        </fieldset>
 
-                        <div class="form-group">
-                            <label for="pin">6-Digit Security PIN *</label>
-                            <input type="password" id="pin" required placeholder="Enter 6 digits" 
-                                   pattern="[0-9]{6}" maxlength="6" inputmode="numeric">
-                            <div class="hint">This PIN will protect your emergency information</div>
-                        </div>
+                        <fieldset class="section-fieldset">
+                            <legend class="section-title">
+                                Security PIN
+                                <span class="section-status incomplete" id="pin-status">Incomplete</span>
+                            </legend>
 
-                        <div class="form-group">
-                            <label for="pin-confirm">Confirm PIN *</label>
-                            <input type="password" id="pin-confirm" required placeholder="Re-enter PIN" 
-                                   pattern="[0-9]{6}" maxlength="6" inputmode="numeric">
-                        </div>
+                            <div class="form-group">
+                                <label for="pin">6-Digit Security PIN *</label>
+                                <input type="password" id="pin" name="pin" required placeholder="Enter 6 digits" 
+                                       pattern="[0-9]{6}" maxlength="6" inputmode="numeric" autocomplete="new-password">
+                                <div class="hint">This PIN will protect your emergency information</div>
+                            </div>
 
-                        <div class="section-title">
-                            Advanced Security (Optional)
-                            <span class="section-status incomplete" id="password-status">Optional</span>
-                        </div>
+                            <div class="form-group">
+                                <label for="pin-confirm">Confirm PIN *</label>
+                                <input type="password" id="pin-confirm" name="pin-confirm" required placeholder="Re-enter PIN" 
+                                       pattern="[0-9]{6}" maxlength="6" inputmode="numeric" autocomplete="new-password">
+                            </div>
+                        </fieldset>
 
-                        <div class="form-group">
-                            <label for="password">Password (for Health Records)</label>
-                            <input type="password" id="password" placeholder="Optional - for EHR access">
-                            <div id="password-strength" class="hint"></div>
-                        </div>
+                        <fieldset class="section-fieldset">
+                            <legend class="section-title">
+                                Advanced Security (Optional)
+                                <span class="section-status" id="password-status">Optional</span>
+                            </legend>
 
-                        <div class="form-group">
-                            <label for="password-confirm">Confirm Password</label>
-                            <input type="password" id="password-confirm" placeholder="Re-enter password">
-                        </div>
+                            <div class="form-group">
+                                <label for="password">Password (for Health Records)</label>
+                                <input type="password" id="password" name="password" placeholder="Optional - for EHR access" autocomplete="new-password">
+                                <div id="password-strength" class="hint"></div>
+                            </div>
 
-                        <div class="hint">
-                            The PIN provides quick access to emergency info. The optional password adds extra protection for health records and private data.
-                        </div>
+                            <div class="form-group">
+                                <label for="password-confirm">Confirm Password</label>
+                                <input type="password" id="password-confirm" name="password-confirm" placeholder="Re-enter password" autocomplete="new-password">
+                            </div>
+
+                            <div class="hint">
+                                The PIN provides quick access to emergency info. The optional password adds extra protection for health records and private data.
+                            </div>
+                        </fieldset>
 
                         <button type="submit" class="btn">
                             <span>Create iKey</span>
@@ -2170,14 +2235,59 @@
                 // Encrypt data
                 const encryptedData = await encrypt(JSON.stringify(currentBlob), currentKey);
 
-                // For testing, store in mock storage
-                if (CONFIG.USE_MOCK_ARCHIVE) {
-                    mockArchiveStorage.set(currentGUID, {
-                        encrypted: true,
-                        version: "3.0",
-                        data: encryptedData
+                // Prepare archive payload
+                const archivePayload = {
+                    encrypted: true,
+                    version: "3.0",
+                    guid: currentGUID,
+                    data: encryptedData,
+                    metadata: {
+                        created: new Date().toISOString(),
+                        hasPIN: true,
+                        hasPassword: !!password
+                    }
+                };
+
+                // Send to webhook
+                showStatus('Uploading encrypted data...', 'info');
+                
+                try {
+                    const response = await fetch(CONFIG.WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-archive-meta-subject': 'Emergency Contacts',
+                            'x-archive-meta-description': 'Encrypted emergency contact information',
+                            'x-archive-meta-guid': currentGUID,
+                            'x-archive-meta-identifier': `ikey_${currentGUID}`,
+                            'x-archive-meta-mediatype': 'data'
+                        },
+                        body: JSON.stringify(archivePayload)
                     });
+
+                    if (!response.ok) {
+                        console.warn('Webhook returned status:', response.status);
+                        // Continue anyway - the QR still works locally
+                    } else {
+                        console.log('Successfully uploaded to webhook');
+                    }
+                } catch (uploadError) {
+                    console.error('Upload error:', uploadError);
+                    // Don't fail the whole process if upload fails
+                    showStatus('Warning: Cloud backup failed, but QR code works offline', 'warning');
+                }
+
+                // Also store in mock storage for testing
+                if (CONFIG.USE_MOCK_ARCHIVE) {
+                    mockArchiveStorage.set(currentGUID, archivePayload);
                     console.log('Stored in mock archive:', currentGUID);
+                }
+
+                // Store locally as fallback
+                try {
+                    localStorage.setItem(`ikey_${currentGUID}`, JSON.stringify(archivePayload));
+                } catch (e) {
+                    console.log('Could not store locally:', e);
                 }
 
                 // Generate embedded data
