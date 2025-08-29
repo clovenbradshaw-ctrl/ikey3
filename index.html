@@ -1633,7 +1633,8 @@
         </div>
     </div>
     <div id="clientCreatorTab">
-        <iframe src="client-qr-creator.html" style="border:none;width:100%;height:100vh;"></iframe>
+        <!-- Explicit relative path ensures the client setup loads even when the app is served from a subdirectory -->
+        <iframe src="./client-qr-creator.html" style="border:none;width:100%;height:100vh;" title="Client setup"></iframe>
     </div>
     <div id="qrTab" style="display:none;">
         <div class="container">
@@ -1677,7 +1678,8 @@
 
     <script>
         // Configuration
-        const VIEWER_URL = 'https://clovenbradshaw-ctrl.github.io/ikey/';
+        // Base URL for generated QR links. Updated to match this project's path.
+        const VIEWER_URL = 'https://clovenbradshaw-ctrl.github.io/ikey3/';
         const BEACON_TEXT = 'SQR:1';
         const WEBHOOK_URL = 'https://n8n.intelechia.com/webhook/d5e99c29-2cf1-44c1-b5b4-95a1ca048441';
         const MANUAL_AUTH_OVERRIDE = "YOUR_MANUAL_AUTH_KEY_HERE";
@@ -3895,7 +3897,11 @@
 
         // Add click handler for logo to return to client creator
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelector('.logo').addEventListener('click', showClientCreator);
+            const logo = document.querySelector('.logo');
+            if (logo) {
+                logo.addEventListener('click', showClientCreator);
+            }
+            // Always show the client creator on initial load
             showClientCreator();
         });
 
